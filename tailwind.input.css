@@ -1,0 +1,731 @@
+/* =========================================================================
+   BIT BLITZ — sumber gaya (Tailwind v4)
+   Dibangun jadi tailwind.css dengan:
+     npx @tailwindcss/cli -i tailwind.input.css -o tailwind.css --minify
+   Hasilnya berkas statis biasa — tidak ada CDN, jadi permainan tetap jalan
+   tanpa internet.
+   ========================================================================= */
+@import "tailwindcss";
+@source "./index.html";
+@source "./daring.html";
+
+/* ---------- palet & token ---------- */
+@theme {
+  --color-ink:     #04060f;
+  --color-panel:   rgba(14,22,40,.72);
+  --color-panel2:  rgba(20,32,56,.6);
+  --color-line:    rgba(88,124,190,.28);
+  --color-fg:      #eaf3ff;
+  --color-dim:     #8ba3c9;
+  --color-dimmer:  #5b6f95;
+  --color-acc:     #3ef2c0;
+  --color-mag:     #ff3fa4;
+  --color-gold:    #ffd23f;
+  --color-bad:     #ff4d6d;
+  --color-hot:     #ff8a3d;
+  --color-blue:    #4fa8ff;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  --radius-panel: 16px;
+
+  --shadow-panel: 0 18px 50px rgba(0,0,0,.5);
+  --shadow-acc:   0 8px 26px rgba(62,242,192,.35);
+}
+
+/* =========================================================================
+   DASAR
+   ========================================================================= */
+@layer base {
+  /* Tiga tingkat perbesaran — tombol ⛶ memutarnya. TV untuk tayangan sekelas. */
+  html { font-size: 18px; }
+  html.zoom1 { font-size: clamp(19px, 2.4vh, 28px); }
+  html.zoom2 { font-size: clamp(22px, 3.2vh, 38px); }
+
+  body {
+    @apply m-0 min-h-dvh relative text-fg;
+    background: var(--color-ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+  kbd {
+    @apply rounded-[5px] border border-line bg-panel2 px-[.38rem] py-[.08rem] text-dim;
+    font-family: var(--font-mono);
+    font-size: .85em;
+  }
+}
+
+/* =========================================================================
+   LAPISAN LATAR — kanvas efek, aurora, garis pindai, vignet
+   ========================================================================= */
+@layer components {
+  #fx    { @apply fixed inset-0 z-0 pointer-events-none; }
+  #scan  { @apply fixed inset-0 z-[1] pointer-events-none opacity-35;
+           background: repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.35) 2px 3px); }
+  #aurora{
+    @apply fixed z-[-1] pointer-events-none opacity-50;
+    inset: -20%;
+    background:
+      radial-gradient(46rem 30rem at 20% 0%,  #1b3f7a 0%, transparent 60%),
+      radial-gradient(38rem 26rem at 85% 12%, #4a1750 0%, transparent 62%),
+      radial-gradient(40rem 30rem at 50% 100%,#0d3f48 0%, transparent 65%);
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+  #vig {
+    @apply fixed inset-0 z-[2] pointer-events-none opacity-0 transition-opacity duration-300;
+    box-shadow: inset 0 0 14rem rgba(255,77,109,.85);
+  }
+  #vig.on { @apply opacity-100; animation: vigpulse .55s ease-in-out infinite alternate; }
+  #hitflash { @apply fixed inset-0 z-[3] pointer-events-none opacity-0 bg-bad; }
+  #hitflash.go { animation: hitf .3s ease-out; }
+
+  .wrap { @apply relative z-[4] mx-auto max-w-[64rem] px-4 pt-4 pb-12; }
+}
+
+/* =========================================================================
+   KEPALA HALAMAN
+   ========================================================================= */
+@layer components {
+  header { @apply flex items-center gap-3 pt-2 pb-5; }
+  .logo {
+    font-family: var(--font-mono);
+    @apply text-[1.15rem] font-extrabold tracking-[.14em];
+    text-shadow: 0 0 22px rgba(62,242,192,.45);
+  }
+  .logo b { @apply text-acc; }
+  .logo i { @apply text-mag not-italic; }
+  .logo span {
+    @apply mt-1 block text-[.68rem] font-normal tracking-[.22em] text-dimmer;
+    text-shadow: none;
+  }
+  .spacer { @apply flex-1; }
+
+  .icobtn {
+    @apply cursor-pointer rounded-[11px] border border-line bg-panel px-[.7rem] py-2
+           text-[.82rem] leading-none text-dim backdrop-blur-md transition-all duration-150;
+    font-family: var(--font-mono);
+  }
+  .icobtn:hover { @apply border-acc text-fg; box-shadow: 0 0 18px rgba(62,242,192,.25); }
+  .icobtn[aria-pressed="true"] { @apply border-acc text-acc; background: rgba(15,52,46,.7); }
+}
+
+/* =========================================================================
+   PANEL KACA
+   ========================================================================= */
+@layer components {
+  .card {
+    @apply rounded-[var(--radius-panel)] border border-line bg-panel p-[1.15rem] backdrop-blur-xl;
+    box-shadow: var(--shadow-panel);
+  }
+  .card + .card { @apply mt-[.9rem]; }
+  h2 {
+    @apply m-0 mb-3 text-[.7rem] font-bold uppercase tracking-[.24em] text-dim;
+  }
+  .btn {
+    @apply cursor-pointer rounded-xl border border-line bg-panel2 px-[1.2rem] py-3
+           text-[.86rem] font-bold text-fg transition-all duration-150;
+  }
+  .btn:hover { @apply border-acc; }
+  .btn.go {
+    @apply border-transparent font-black;
+    background: linear-gradient(135deg, var(--color-acc), #2ad0ff);
+    color: #032019;
+    box-shadow: 0 8px 26px rgba(62,242,192,.32);
+  }
+  .row { @apply mt-4 flex flex-wrap gap-2; }
+  .foot { @apply mt-7 text-center text-[.72rem] leading-relaxed text-dimmer; }
+}
+
+/* =========================================================================
+   SAKELAR ARAH KONVERSI
+   ========================================================================= */
+@layer components {
+  .switch {
+    @apply relative grid grid-cols-2 gap-2 rounded-[var(--radius-panel)] border border-line p-2;
+    background: rgba(6,12,24,.55);
+  }
+  .switch button {
+    @apply relative cursor-pointer overflow-hidden rounded-xl border border-transparent
+           bg-transparent px-[.6rem] py-4 text-center text-dim transition-all duration-200;
+  }
+  .switch button .t { @apply block text-[.85rem] font-extrabold tracking-[.06em]; }
+  .switch button .e {
+    @apply mt-[.45rem] block text-[1.2rem] text-dimmer;
+    font-family: var(--font-mono);
+  }
+  .switch button:hover { @apply text-fg; }
+  .switch button[aria-pressed="true"] {
+    @apply border-acc text-fg;
+    background: linear-gradient(160deg, rgba(62,242,192,.16), rgba(62,242,192,.03));
+    box-shadow: 0 0 26px rgba(62,242,192,.22);
+  }
+  .switch button[aria-pressed="true"] .e {
+    @apply text-acc;
+    text-shadow: 0 0 14px rgba(62,242,192,.6);
+  }
+  .switch button[aria-pressed="true"]::after {
+    content: "";
+    @apply absolute bottom-0 left-[12%] right-[12%] h-[2px];
+    background: linear-gradient(90deg, transparent, var(--color-acc), transparent);
+  }
+}
+
+/* =========================================================================
+   TOMBOL MODE
+   ========================================================================= */
+@layer components {
+  .modes { @apply mt-[1.1rem] grid gap-[.55rem]; }
+  .mode {
+    @apply relative flex w-full cursor-pointer items-center gap-4 overflow-hidden
+           rounded-[13px] border border-line bg-panel2 px-4 py-[.9rem]
+           text-left text-fg transition-all duration-200;
+  }
+  .mode::before {
+    content: "";
+    @apply absolute bottom-0 left-0 top-0 w-[3px] transition-all duration-200;
+    background: var(--color-dimmer);
+  }
+  .mode:hover { @apply translate-x-1 border-acc; }
+  .mode:hover::before { background: var(--color-acc); box-shadow: 0 0 14px var(--color-acc); }
+  .mode .k { @apply w-8 text-center text-[1.5rem]; }
+  .mode .n { @apply block text-[1rem] font-extrabold tracking-[.03em]; }
+  .mode .d { @apply mt-[.2rem] block text-[.77rem] leading-relaxed text-dim; }
+  .mode.primary {
+    @apply border-acc;
+    background: linear-gradient(100deg, rgba(62,242,192,.14), rgba(20,32,56,.6));
+  }
+  .mode.primary::before { background: var(--color-acc); box-shadow: 0 0 14px var(--color-acc); }
+}
+
+/* =========================================================================
+   HUD
+   ========================================================================= */
+@layer components {
+  .hud { @apply mb-[.6rem] flex flex-wrap items-center gap-[.45rem]; }
+  .chip {
+    @apply whitespace-nowrap rounded-[11px] border border-line bg-panel
+           px-[.85rem] py-2 text-[.95rem] text-dim backdrop-blur-md;
+    font-family: var(--font-mono);
+  }
+  .chip b { @apply font-bold text-fg; }
+  .chip.lv b { @apply text-gold; }
+  .chip.sc b {
+    @apply text-[1.3rem] text-acc;
+    text-shadow: 0 0 16px rgba(62,242,192,.5);
+  }
+  .hearts {
+    @apply text-[1.2rem] tracking-[.16em];
+    color: var(--color-bad) !important;
+    text-shadow: 0 0 12px rgba(255,77,109,.6);
+  }
+  .hearts .off { @apply text-dimmer; text-shadow: none; }
+
+  #hCombo { @apply font-extrabold transition-all duration-150; }
+  .c1  { @apply text-dim; }
+  .c15 { @apply text-gold; }
+  .c2  { @apply text-hot; }
+  .c3  { @apply text-mag; text-shadow: 0 0 16px rgba(255,63,164,.7); }
+  .c5  {
+    background: linear-gradient(90deg, var(--color-gold), var(--color-mag), var(--color-acc));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: rainbow 1.4s linear infinite;
+  }
+  .pop { animation: popk .4s ease; }
+
+  /* tangga level */
+  .ladder { @apply ml-[.15rem] flex items-center gap-[3px]; }
+  .ladder i {
+    @apply h-[.4rem] w-[1.1rem] rounded-[2px] transition-all duration-300;
+    background: rgba(120,150,200,.22);
+  }
+  .ladder i.on   { background: var(--color-gold); box-shadow: 0 0 10px var(--color-gold); }
+  .ladder i.boss { background: var(--color-mag);  box-shadow: 0 0 10px var(--color-mag); }
+
+  /* bilah waktu */
+  .tbar {
+    @apply relative mb-4 h-[.9rem] overflow-hidden rounded-full border border-line;
+    background: rgba(6,12,24,.7);
+  }
+  .tbar i {
+    @apply block h-full w-full rounded-full;
+    background: linear-gradient(90deg, var(--color-acc), var(--color-blue));
+    box-shadow: 0 0 18px rgba(62,242,192,.55);
+    transition: width .1s linear;
+  }
+  .tbar.warn { animation: blink .5s steps(2, end) infinite; }
+  .tbar.warn i {
+    background: linear-gradient(90deg, var(--color-bad), var(--color-hot));
+    box-shadow: 0 0 22px rgba(255,77,109,.7);
+  }
+}
+
+/* =========================================================================
+   PANGGUNG SOAL
+   ========================================================================= */
+@layer components {
+  .stage {
+    @apply relative overflow-hidden rounded-[var(--radius-panel)] border border-line
+           bg-panel px-4 py-7 text-center backdrop-blur-xl;
+    box-shadow: var(--shadow-panel);
+  }
+  .stage::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0;
+    background: radial-gradient(30rem 14rem at 50% 0%, rgba(62,242,192,.09), transparent 70%);
+  }
+  .stage.boss { @apply border-mag; box-shadow: 0 0 60px rgba(255,63,164,.28); }
+  .stage.boss::before {
+    background: radial-gradient(30rem 16rem at 50% 0%, rgba(255,63,164,.22), transparent 70%);
+    animation: bosspulse 1.1s ease-in-out infinite alternate;
+  }
+  .bossbar {
+    @apply mb-[.8rem] text-[.72rem] tracking-[.28em] text-mag;
+    font-family: var(--font-mono);
+    text-shadow: 0 0 18px rgba(255,63,164,.8);
+    animation: blink 1s steps(2, end) infinite;
+  }
+  .ask { @apply mb-4 text-[.82rem] uppercase tracking-[.26em] text-dim; }
+
+  /* Ukuran soal diikat ke lebar DAN tinggi layar, supaya di TV tidak perlu digulir. */
+  .q {
+    font-family: var(--font-mono);
+    @apply font-extrabold leading-[1.05] tracking-[.02em] break-words;
+    font-size: clamp(2.6rem, min(17vw, 26vh), 8.5rem);
+    text-shadow: 0 0 40px rgba(79,168,255,.35);
+  }
+  .q.bin {
+    @apply text-acc tracking-[.06em];
+    font-size: clamp(1.9rem, min(11vw, 19vh), 6rem);
+    text-shadow: 0 0 32px rgba(62,242,192,.55);
+  }
+  .qin { animation: qin .32s cubic-bezier(.2,.9,.3,1.4); }
+
+  .hint {
+    @apply mt-[.9rem] min-h-[1.2em] text-[1rem] text-dim;
+    font-family: var(--font-mono);
+  }
+  .hint b { @apply text-gold; }
+  .fb {
+    @apply mt-[.9rem] min-h-[2.7em] text-[1.05rem] leading-relaxed;
+    font-family: var(--font-mono);
+  }
+  .fb.ok { @apply text-acc; }
+  .fb.no { @apply text-bad; }
+  .fb .plus { @apply text-gold; }
+}
+
+/* =========================================================================
+   JAWAB: BINER → DESIMAL
+   ========================================================================= */
+@layer components {
+  .answer { @apply mt-[1.3rem] flex flex-wrap justify-center gap-2; }
+  input.num {
+    @apply w-[min(100%,11.5rem)] rounded-[13px] border-2 border-line px-[.6rem] py-2
+           text-center text-[2.1rem] font-extrabold text-fg outline-none
+           transition-all duration-200;
+    background: rgba(4,8,18,.85);
+    font-family: var(--font-mono);
+  }
+  input.num:focus {
+    @apply border-acc;
+    box-shadow: 0 0 0 4px rgba(62,242,192,.14), 0 0 30px rgba(62,242,192,.25);
+  }
+  .send {
+    @apply cursor-pointer rounded-[13px] border-0 px-[1.6rem] text-[.92rem]
+           font-black tracking-[.1em] transition-all duration-100;
+    background: linear-gradient(135deg, var(--color-acc), #2ad0ff);
+    color: #032019;
+    box-shadow: var(--shadow-acc);
+  }
+  .send:hover  { filter: brightness(1.1); }
+  .send:active { @apply translate-y-[2px] scale-[.98]; }
+}
+
+/* =========================================================================
+   JAWAB: DESIMAL → BINER (sakelar LED)
+   ========================================================================= */
+@layer components {
+  .bitrail { @apply relative mt-[1.3rem]; }
+  .bitrail::before {
+    content: "";
+    @apply absolute left-[6%] right-[6%] top-1/2 h-[2px];
+    background: linear-gradient(90deg, transparent, rgba(88,124,190,.35), transparent);
+  }
+  /* satu baris utuh — 11 bit harus terbaca dari 1024 sampai 1 tanpa terpotong */
+  .bits {
+    @apply relative flex max-w-full flex-nowrap justify-center;
+    gap: clamp(.15rem, .9vw, .4rem);
+  }
+  .bit {
+    @apply flex cursor-pointer flex-col items-center gap-1 rounded-[14px]
+           border-2 border-line px-[.15rem] pb-[.45rem] pt-[.6rem] transition-all duration-150;
+    flex: 0 1 4.4rem;
+    min-width: 1.45rem;
+    color: var(--color-dimmer);
+    background: linear-gradient(180deg, rgba(20,32,56,.9), rgba(8,14,28,.9));
+    box-shadow: 0 5px 0 rgba(0,0,0,.45);
+    font-family: var(--font-mono);
+  }
+  .bit .led {
+    @apply h-[.55rem] w-[.55rem] flex-none rounded-full transition-all duration-150;
+    background: rgba(120,150,200,.25);
+  }
+  .bit .v { @apply font-extrabold leading-none; font-size: clamp(.9rem, min(4.6vw, 9vh), 2.6rem); }
+  .bit .p { @apply leading-none tracking-normal; font-size: clamp(.42rem, min(1.9vw, 2.6vh), .9rem); }
+  .bit:hover { @apply border-dim; }
+  .bit.on {
+    @apply border-acc text-acc;
+    background: linear-gradient(180deg, rgba(62,242,192,.22), rgba(8,30,26,.9));
+    box-shadow: 0 5px 0 rgba(0,0,0,.45), 0 0 26px rgba(62,242,192,.4);
+  }
+  .bit.on .led { background: var(--color-acc); box-shadow: 0 0 12px var(--color-acc), 0 0 24px var(--color-acc); }
+  .bit.on .v   { text-shadow: 0 0 16px rgba(62,242,192,.7); }
+  .bit:active, .bit.press { @apply translate-y-[3px]; box-shadow: 0 1px 0 rgba(0,0,0,.45); }
+  .bits.hidelabel .p { @apply invisible; }
+  .bits.dimlabel  .p { @apply opacity-30; }
+}
+
+/* =========================================================================
+   MARATON KELAS
+   ========================================================================= */
+@layer components {
+  .mline {
+    @apply mb-[.7rem] rounded-[var(--radius-panel)] border border-line bg-panel
+           px-[.95rem] py-3 backdrop-blur-xl;
+  }
+  .mtop { @apply flex flex-wrap items-baseline gap-[.6rem]; font-family: var(--font-mono); }
+  .mtop .lbl { @apply text-[.62rem] tracking-[.22em] text-dim; }
+  .mtop .who {
+    @apply break-words text-[1.25rem] font-extrabold text-gold;
+    text-shadow: 0 0 22px rgba(255,210,63,.55);
+  }
+  .mtop .who.ganti { animation: popk .45s ease; }
+  .mtop .st { @apply ml-auto whitespace-nowrap text-[.72rem] tracking-[.16em] text-dim; }
+  .mtop .st b {
+    @apply align-[-.12em] text-[1.9rem] font-black text-acc;
+    text-shadow: 0 0 22px rgba(62,242,192,.6);
+  }
+  .mbar {
+    @apply mt-[.55rem] h-3 overflow-hidden rounded-full border border-line;
+    background: rgba(6,12,24,.7);
+  }
+  .mbar i {
+    @apply block h-full w-0 rounded-full;
+    background: linear-gradient(90deg, var(--color-acc), var(--color-gold));
+    box-shadow: 0 0 18px rgba(62,242,192,.5);
+    transition: width .38s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .mbar.near i {
+    background: linear-gradient(90deg, var(--color-gold), var(--color-mag));
+    box-shadow: 0 0 26px rgba(255,63,164,.65);
+  }
+}
+
+/* =========================================================================
+   SUASANA — denyut ketukan, panas combo, panik
+   ========================================================================= */
+@layer components {
+  body.beat .stage  { box-shadow: var(--shadow-panel), 0 0 46px rgba(62,242,192,.2); }
+  body.beat .logo b { text-shadow: 0 0 28px var(--color-acc); }
+  body.beat .mtop .st b { @apply inline-block scale-105; }
+
+  /* latar ikut memanas mengikuti combo */
+  html.hot1 #aurora { filter: hue-rotate(25deg) saturate(1.35); @apply opacity-60; }
+  html.hot2 #aurora { filter: hue-rotate(50deg) saturate(1.7);  @apply opacity-70; }
+  html.hot3 #aurora { filter: hue-rotate(80deg) saturate(2.1);  @apply opacity-85; }
+  html.hot2 .stage  { border-color: rgba(255,138,61,.4); }
+  html.hot3 .stage  { border-color: rgba(255,63,164,.5); }
+
+  /* panik selalu menang atas efek combo */
+  html.panik #aurora { filter: hue-rotate(-70deg) saturate(1.6); @apply opacity-75; }
+  html.panik .stage  { border-color: rgba(255,77,109,.5); }
+  body.beat.panik .stage { box-shadow: var(--shadow-panel), 0 0 52px rgba(255,77,109,.35); }
+}
+
+/* =========================================================================
+   ESTAFET — pemilih giliran & daftar peserta
+   ========================================================================= */
+@layer components {
+  #turn {
+    @apply fixed inset-0 z-[28] hidden items-center justify-center p-5 text-center backdrop-blur-lg;
+    background: rgba(4,6,15,.9);
+  }
+  #turn.on   { @apply flex; }
+  #turn .box { @apply w-full max-w-[30rem]; }
+  #turn .lbl { @apply text-[.68rem] tracking-[.26em] text-dim; }
+  #turn .warn {
+    @apply mb-[1.1rem] mt-2 text-[.76rem] text-bad;
+    font-family: var(--font-mono);
+  }
+  #turn .picks {
+    @apply grid max-h-[52vh] gap-2 overflow-y-auto p-[.15rem];
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  }
+  #turn .pick {
+    @apply cursor-pointer rounded-xl border border-line bg-panel2 px-[.6rem] py-[.85rem]
+           text-[1rem] font-bold text-fg transition-all duration-150;
+    font-family: var(--font-mono);
+  }
+  #turn .pick:hover { @apply border-gold; box-shadow: 0 0 20px rgba(255,210,63,.25); }
+  #turn .pick small { @apply mt-[.3rem] block text-[.62rem] font-normal text-dimmer; }
+  #turn .pick[disabled] { @apply cursor-not-allowed opacity-30; }
+
+  .roster { @apply mb-[.7rem] flex flex-wrap justify-center gap-[.35rem]; }
+  .pl {
+    @apply rounded-full border border-line bg-panel2 px-[.7rem] py-[.28rem] text-[.72rem] text-dim;
+    font-family: var(--font-mono);
+  }
+  .pl.now { @apply border-gold text-gold; box-shadow: 0 0 16px rgba(255,210,63,.3); }
+}
+
+/* =========================================================================
+   DUEL REBUTAN
+   ========================================================================= */
+@layer components {
+  .sides { @apply mt-[.6rem] grid grid-cols-2 gap-[.6rem]; }
+  .side {
+    @apply rounded-[var(--radius-panel)] border border-line bg-panel p-[.85rem]
+           backdrop-blur-lg transition-all duration-150;
+  }
+  .side.a { border-color: rgba(62,242,192,.45); }
+  .side.b { border-color: rgba(255,63,164,.45); }
+  .side.lock { @apply opacity-40; filter: grayscale(.5); }
+  .side h3 {
+    @apply m-0 mb-[.6rem] flex items-center justify-between gap-2
+           text-[.9rem] uppercase tracking-[.14em];
+  }
+  .side.a h3 { @apply text-acc; }
+  .side.b h3 { @apply text-mag; }
+  .side h3 b { @apply text-[2rem]; font-family: var(--font-mono); }
+
+  .opts { @apply grid grid-cols-2 gap-[.4rem]; }
+  .opt {
+    @apply flex cursor-pointer flex-col items-center gap-1 break-all rounded-[11px]
+           border border-line px-[.3rem] py-[.7rem] font-bold text-fg transition-all duration-100;
+    background: rgba(4,8,18,.75);
+    font-family: var(--font-mono);
+    font-size: clamp(.9rem, 3.4vw, 1.7rem);
+  }
+  .opt .kk {
+    @apply rounded-[5px] border border-line px-[.32rem] py-[.02rem]
+           text-[.72rem] font-extrabold leading-tight tracking-[.08em] text-dim;
+  }
+  .side.a .opt .kk { @apply text-acc; border-color: rgba(62,242,192,.4); }
+  .side.b .opt .kk { @apply text-mag; border-color: rgba(255,63,164,.4); }
+  .opt:hover  { @apply border-acc; }
+  .opt.right  { @apply border-acc; background: rgba(62,242,192,.22); }
+  .opt.wrong  { @apply border-bad; background: rgba(255,77,109,.22); }
+  .lockmsg {
+    @apply mt-[.45rem] min-h-[1.2em] text-center text-[.76rem] text-bad;
+    font-family: var(--font-mono);
+  }
+}
+
+/* =========================================================================
+   KUIS KELAS (proyektor)
+   ========================================================================= */
+@layer components {
+  .kwrap { @apply grid grid-cols-1 gap-[.7rem]; }
+  @media (min-width: 52rem) { .kwrap { grid-template-columns: 1fr 16rem; } }
+
+  .kbig {
+    @apply break-words font-black leading-[1.05] text-acc;
+    font-family: var(--font-mono);
+    font-size: clamp(2.6rem, min(18vw, 26vh), 10rem);
+    text-shadow: 0 0 50px rgba(62,242,192,.5);
+  }
+  .kcount {
+    @apply mt-[.6rem] font-black text-gold;
+    font-family: var(--font-mono);
+    font-size: clamp(2rem, min(11vw, 13vh), 5rem);
+  }
+  .kcount.low { @apply text-bad; animation: blink .5s steps(2, end) infinite; }
+
+  .grp {
+    @apply mb-[.45rem] flex items-center gap-2 rounded-[11px] border border-line
+           bg-panel2 px-[.65rem] py-[.55rem] text-[1rem];
+    font-family: var(--font-mono);
+  }
+  .grp .n { @apply flex-1 overflow-hidden text-ellipsis whitespace-nowrap; }
+  .grp .s { @apply font-extrabold text-gold; }
+  .grp .idx {
+    @apply grid h-[1.35rem] w-[1.35rem] flex-none place-items-center rounded-[7px]
+           text-[.7rem] text-dim;
+    background: rgba(120,150,200,.18);
+  }
+  .grp.mark { @apply border-acc; background: rgba(62,242,192,.15); }
+  .grp.mark .idx { background: var(--color-acc); color: #032019; }
+  .grp input {
+    @apply w-[4.6rem] rounded-lg border border-line px-[.4rem] py-1 text-right text-[.84rem] text-gold;
+    background: rgba(4,8,18,.85);
+    font-family: var(--font-mono);
+  }
+}
+
+/* =========================================================================
+   FORMULIR, HASIL, PAPAN KELAS
+   ========================================================================= */
+@layer components {
+  .field { @apply mb-[.9rem] block; }
+  .field label {
+    @apply mb-[.4rem] block text-[.68rem] font-bold uppercase tracking-[.18em] text-dim;
+  }
+  .field input, .field textarea, .field select {
+    @apply w-full rounded-[11px] border border-line px-[.7rem] py-[.6rem] text-[1rem] text-fg outline-none;
+    background: rgba(4,8,18,.85);
+    font-family: var(--font-mono);
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { @apply border-acc; }
+  .field textarea { @apply min-h-[5.5rem] resize-y leading-relaxed; }
+  .field .h { @apply mt-[.4rem] text-[.72rem] leading-relaxed text-dimmer; }
+
+  .big {
+    @apply font-black leading-none text-acc;
+    font-family: var(--font-mono);
+    font-size: clamp(2.8rem, 14vw, 4.8rem);
+    text-shadow: 0 0 46px rgba(62,242,192,.55);
+  }
+  .stats {
+    @apply mt-[1.1rem] grid gap-2;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  }
+  .stat { @apply rounded-xl border border-line bg-panel2 p-[.7rem]; }
+  .stat .l { @apply text-[.63rem] uppercase tracking-[.16em] text-dim; }
+  .stat .v { @apply mt-1 text-[1.4rem] font-extrabold; font-family: var(--font-mono); }
+  .recs { @apply grid gap-2; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+
+  .badges { @apply flex flex-wrap gap-[.4rem]; }
+  .badge {
+    @apply rounded-full border border-line bg-panel2 px-[.8rem] py-[.38rem] text-[.74rem] text-dimmer;
+  }
+  .badge.got {
+    @apply text-gold;
+    border-color: rgba(255,210,63,.45);
+    background: rgba(255,210,63,.09);
+    box-shadow: 0 0 18px rgba(255,210,63,.15);
+  }
+  .badge.new { animation: popk .55s ease; }
+
+  .codebox {
+    @apply font-black tracking-[.16em] text-gold;
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 7vw, 2.2rem);
+    text-shadow: 0 0 26px rgba(255,210,63,.5);
+  }
+
+  table.board { @apply w-full border-collapse text-[.8rem]; font-family: var(--font-mono); }
+  table.board th {
+    @apply border-b border-line px-2 py-[.45rem] text-left text-[.62rem]
+           font-bold uppercase tracking-[.16em] text-dim;
+  }
+  table.board td { @apply px-2 py-[.45rem]; border-bottom: 1px solid rgba(88,124,190,.12); }
+  table.board tbody tr:first-child td { @apply text-gold; }
+}
+
+/* =========================================================================
+   HAMBURAN — angka melayang, spanduk, hitung mundur
+   ========================================================================= */
+@layer components {
+  .float {
+    @apply pointer-events-none fixed z-20 text-[1.9rem] font-black text-gold;
+    font-family: var(--font-mono);
+    text-shadow: 0 0 24px rgba(255,210,63,.8);
+    animation: fly 1.05s cubic-bezier(.15,.8,.3,1) forwards;
+  }
+  #banner { @apply pointer-events-none fixed inset-0 z-[25] flex items-center justify-center opacity-0; }
+  #banner.go { animation: bann 1.3s ease-out; }
+  #banner div {
+    @apply border-y-2 px-[1.6rem] py-4 text-center font-black tracking-[.14em] text-gold;
+    font-family: var(--font-mono);
+    font-size: clamp(1.4rem, 6vw, 2.8rem);
+    border-color: var(--color-gold);
+    text-shadow: 0 0 40px rgba(255,210,63,.9);
+    background: linear-gradient(90deg, transparent, rgba(255,210,63,.14), transparent);
+  }
+  #count {
+    @apply fixed inset-0 z-30 hidden items-center justify-center backdrop-blur-md;
+    background: rgba(4,6,15,.82);
+  }
+  #count.on { @apply flex; }
+  #count b {
+    @apply font-black text-acc;
+    font-family: var(--font-mono);
+    font-size: clamp(5rem, 26vw, 13rem);
+    text-shadow: 0 0 70px rgba(62,242,192,.8);
+    animation: cnt .68s ease-out;
+  }
+  .shake { animation: shk .3s; }
+}
+
+/* =========================================================================
+   MODE TV — hiasan dipangkas agar muat satu layar tanpa digulir
+   ========================================================================= */
+@layer components {
+  html.zoom2 header      { @apply pb-[.45rem] pt-[.15rem]; }
+  html.zoom2 .logo       { @apply text-[.85rem]; }
+  html.zoom2 .logo span  { @apply hidden; }
+  html.zoom2 .stage      { @apply px-[.6rem] py-[.9rem]; }
+  html.zoom2 .ask        { @apply mb-2 text-[.6rem]; }
+  html.zoom2 .answer     { @apply mt-[.7rem]; }
+  html.zoom2 .bitrail    { @apply mt-[.7rem]; }
+  html.zoom2 .fb         { @apply mt-2 min-h-[1.8em] text-[.72rem]; }
+  html.zoom2 .hint       { @apply mt-2 text-[.7rem]; }
+  html.zoom2 .card       { @apply p-[.8rem]; }
+  html.zoom2 .wrap       { @apply px-[.7rem] pb-4 pt-2; }
+  /* panggung memenuhi tinggi layar supaya tayangan TV tidak menyisakan ruang kosong */
+  html.zoom2 #game       { @apply flex flex-col; min-height: calc(100dvh - 5rem); }
+  html.zoom2 #game .stage{ @apply flex flex-1 flex-col justify-center; }
+  html.zoom2 #kuis .stage{ min-height: calc(100dvh - 13rem); }
+}
+
+/* =========================================================================
+   LAYAR SEMPIT
+   ========================================================================= */
+@media (max-width: 480px) {
+  .stage { @apply px-2 py-[1.4rem]; }
+  .bit   { @apply rounded-[9px] border px-[.1rem] pb-[.3rem] pt-[.42rem]; }
+  .switch button .e { @apply text-[1rem]; }
+}
+
+/* =========================================================================
+   ANIMASI
+   ========================================================================= */
+@keyframes drift     { to { transform: translate3d(-3%, 2%, 0) scale(1.08); } }
+@keyframes vigpulse  { from { opacity: .45 } to { opacity: 1 } }
+@keyframes hitf      { 0% { opacity: .3 } 100% { opacity: 0 } }
+@keyframes blink     { 50% { opacity: .4 } }
+@keyframes bosspulse { to { opacity: .45 } }
+@keyframes rainbow   { to { filter: hue-rotate(360deg) } }
+@keyframes popk      { 0% { transform: scale(1) } 45% { transform: scale(1.3) } 100% { transform: scale(1) } }
+@keyframes qin       { from { opacity: 0; transform: translateY(14px) scale(.94) } to { opacity: 1; transform: none } }
+@keyframes cnt       { 0% { opacity: 0; transform: scale(2.1) } 35% { opacity: 1; transform: scale(1) } 100% { opacity: 0; transform: scale(.75) } }
+@keyframes shk {
+  0%, 100% { transform: translateX(0) }
+  20%  { transform: translateX(-11px) }
+  60%  { transform: translateX(9px) }
+  80%  { transform: translateX(-4px) }
+}
+@keyframes fly {
+  0%   { opacity: 0; transform: translate(-50%, 0) scale(.6) }
+  18%  { opacity: 1; transform: translate(-50%, -14px) scale(1.15) }
+  100% { opacity: 0; transform: translate(-50%, -105px) scale(1) }
+}
+@keyframes bann {
+  0%   { opacity: 0; transform: scale(.8) }
+  18%  { opacity: 1; transform: scale(1) }
+  75%  { opacity: 1 }
+  100% { opacity: 0; transform: scale(1.05) }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  #aurora, #scan { display: none; }
+}
+
+/* =========================================================================
+   .hidden HARUS menang atas utilitas tata letak apa pun.
+   JS memakainya untuk berpindah layar; tanpa !important, aturan seperti
+   `html.zoom2 #game { display:flex }` akan memunculkan layar yang disembunyikan.
+   ========================================================================= */
+.hidden { display: none !important; }

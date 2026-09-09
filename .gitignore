@@ -1,0 +1,19 @@
+# Pengaturan lokal Claude Code
+.claude/
+
+# Perkakas pembangun Tailwind (tidak perlu ikut ke repositori)
+node_modules/
+
+# ---------------------------------------------------------------------------
+# apps-script.gs sengaja TIDAK diikutkan.
+#
+# GitHub Pages gratis mengharuskan repositori bersifat publik, sehingga berkas
+# apa pun di sini bisa dibaca siapa saja — termasuk murid. Kalau PIN_GURU di
+# dalamnya sudah diganti dengan PIN asli, PIN itu ikut terbaca dan murid bisa
+# membuat, memulai, atau menghentikan sesi sendiri.
+#
+# Isi berkas itu cukup ditempel ke editor Google Apps Script; tidak ada gunanya
+# berada di GitHub Pages. Hapus baris di bawah kalau Anda tetap ingin
+# mengunggahnya — pastikan PIN-nya masih placeholder.
+# ---------------------------------------------------------------------------
+apps-script.gs

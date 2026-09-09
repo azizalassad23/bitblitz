@@ -1,0 +1,1789 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BIT BLITZ — Konversi Biner &amp; Desimal</title>
+<meta name="description" content="Permainan konversi bilangan biner ke desimal dan sebaliknya, 4-bit sampai 11-bit.">
+<link rel="stylesheet" href="tailwind.css">
+</head>
+<body>
+<div id="aurora"></div>
+<canvas id="fx"></canvas>
+<div id="scan"></div>
+<div id="vig"></div>
+<div id="hitflash"></div>
+<div id="banner"><div></div></div>
+<div id="count"><b></b></div>
+<div id="turn"><div class="box">
+  <div class="lbl">SIAPA YANG MENJAWAB SOAL BERIKUTNYA?</div>
+  <div class="warn">⏱ Waktu tetap berjalan — cepat pilih!</div>
+  <div class="picks" id="picks"></div>
+</div></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo"><b>BIT</b> <i>BLITZ</i><span>KONVERSI BINER · 4—11 BIT</span></div>
+  <div class="spacer"></div>
+  <button class="icobtn" id="bSound" aria-pressed="true" title="Efek suara">♪</button>
+  <button class="icobtn" id="bMusic" aria-pressed="true" title="Musik latar">♫</button>
+  <button class="icobtn" id="bProj" aria-pressed="false"
+          title="Perbesaran tampilan: Normal → Besar → TV">⛶ NORMAL</button>
+</header>
+
+<!-- ================= HOME ================= -->
+<section id="home">
+  <div class="card">
+    <h2>1 · Pilih arah konversi</h2>
+    <div class="switch" id="sw">
+      <button data-dir="b2d" aria-pressed="true">
+        <span class="t">BINER → DESIMAL</span><span class="e">1011 → ?</span>
+      </button>
+      <button data-dir="d2b" aria-pressed="false">
+        <span class="t">DESIMAL → BINER</span><span class="e">11 → ?</span>
+      </button>
+    </div>
+
+    <h2 class="mt-[1.3rem]">2 · Pilih mode — langsung mulai</h2>
+    <div class="modes">
+      <button class="mode primary" data-mode="sprint">
+        <span class="k">⚡</span>
+        <span><span class="n">SOLO SPRINT</span>
+        <span class="d">90 detik · 3 nyawa · level naik sendiri. Mode utama.</span></span>
+      </button>
+      <button class="mode" data-mode="latihan">
+        <span class="k">◎</span>
+        <span><span class="n">LATIHAN</span>
+        <span class="d">Tanpa timer, tanpa nyawa. Salah? dijelaskan langkahnya.</span></span>
+      </button>
+      <button class="mode" data-mode="survival">
+        <span class="k">∞</span>
+        <span><span class="n">SURVIVAL</span>
+        <span class="d">Tanpa timer. 3 nyawa. Level naik terus, tak pernah turun.</span></span>
+      </button>
+    </div>
+
+    <div class="row mt-4">
+      <button class="icobtn" id="bLabel" aria-pressed="false"
+              title="Sembunyikan label nilai tempat di semua level">
+        LABEL NILAI TEMPAT: OTOMATIS
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Mode kelompok — aturannya berbeda</h2>
+    <div class="modes">
+      <button class="mode gmode" data-mode="estafet">
+        <span class="k">🔗</span>
+        <span><span class="n">ESTAFET BIT</span>
+        <span class="d">1 perangkat per kelompok. Nyawa dipakai bersama, tak boleh menjawab
+        dua kali berturut-turut, dan tim dapat bonus waktu tiap semua anggota kebagian.</span></span>
+      </button>
+      <button class="mode gmode" data-mode="maraton">
+        <span class="k">🏃</span>
+        <span><span class="n">MARATON KELAS</span>
+        <span class="d">Sekelas, tanpa batas jumlah peserta. Giliran berurutan dari nomor 1.
+        Kelas dinyatakan lulus bila mencapai rentetan benar sesuai target sebelum waktu habis —
+        satu orang salah, rentetan kembali ke nol.</span></span>
+      </button>
+      <button class="mode gmode" data-mode="duel">
+        <span class="k">⚔</span>
+        <span><span class="n">DUEL REBUTAN</span>
+        <span class="d">1 perangkat, layar dibagi dua. Rebutan pilihan ganda; salah jawab
+        terkunci 3 detik. Menang duluan 6 poin.</span></span>
+      </button>
+      <button class="mode gmode" data-mode="kuis">
+        <span class="k">📽</span>
+        <span><span class="n">KUIS KELAS</span>
+        <span class="d">Hanya 1 layar proyektor. Guru menekan Spasi, kelompok menjawab di
+        kertas. Ditutup Ronde Taruhan.</span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Rekor kamu</h2>
+    <div class="recs" id="recs"></div>
+  </div>
+
+  <div class="card">
+    <h2>Lencana</h2>
+    <div class="badges" id="badgeList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Untuk guru</h2>
+    <div class="field">
+      <label>Kode sesi (opsional)</label>
+      <input id="sesi" placeholder="mis. XIA-2026" autocomplete="off">
+      <div class="h">Semua murid yang memakai kode sama akan menerima urutan soal yang
+      sama pada level yang sama — supaya hasilnya adil dibandingkan. Kosongkan untuk soal acak.</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="bGuru">PAPAN KELAS →</button>
+      <button class="btn" id="bDaring">MODE DARING →</button>
+    </div>
+    <div class="h">Mode daring: murid bergiliran menjawab dari HP masing-masing dan nilainya
+    masuk sendiri ke Google Spreadsheet. Perlu dipasang sekali — lihat PANDUAN-DARING.md.</div>
+  </div>
+
+  <p class="foot">
+    Ketik jawaban lalu <kbd>Enter</kbd>. Di mode Desimal → Biner, nyalakan bit dengan klik
+    atau tombol <kbd>1</kbd>…<kbd>0</kbd><kbd>-</kbd>, lalu <kbd>Enter</kbd> untuk mengirim.
+  </p>
+</section>
+
+<!-- ================= GAME ================= -->
+<section id="game" class="hidden">
+  <div class="hud">
+    <span class="chip lv">LV <b id="hLv">1</b>·<b id="hBit">4</b>bit</span>
+    <span class="ladder" id="ladder"></span>
+    <span class="chip sc">SKOR <b id="hSc">0</b></span>
+    <span class="chip" id="hLivesWrap">NYAWA <b class="hearts" id="hLives"></b></span>
+    <span class="chip" id="hComboWrap">COMBO <b id="hCombo" class="c1">×1</b></span>
+    <span class="spacer"></span>
+    <button class="icobtn" id="bQuit">KELUAR</button>
+  </div>
+
+  <div class="mline hidden" id="mline">
+    <div class="mtop">
+      <span class="lbl">GILIRAN</span>
+      <span class="who" id="mWho">—</span>
+      <span class="st">RENTETAN <b id="mStreak">0</b>/<span id="mTarget">15</span></span>
+    </div>
+    <div class="mbar" id="mBar"><i id="mFill"></i></div>
+  </div>
+  <div class="roster hidden" id="roster"></div>
+  <div class="tbar" id="tbar"><i id="tfill"></i></div>
+
+  <div class="stage" id="stage">
+    <div class="bossbar hidden" id="bossbar">⚡ BOSS ROUND · NILAI DOBEL · SEKALI SALAH GUGUR ⚡</div>
+    <div class="ask" id="ask">BERAPA NILAI DESIMALNYA?</div>
+    <div class="q" id="q">—</div>
+
+    <div id="ansB2D" class="answer">
+      <input class="num" id="inp" inputmode="numeric" autocomplete="off" placeholder="?">
+      <button class="send" id="bSend">KIRIM</button>
+    </div>
+
+    <div id="ansD2B" class="hidden">
+      <div class="bitrail"><div class="bits" id="bits"></div></div>
+      <div class="answer"><button class="send" id="bSend2">KIRIM</button></div>
+    </div>
+
+    <div class="hint" id="hint"></div>
+    <div class="fb" id="fb"></div>
+  </div>
+</section>
+
+<!-- ================= RESULT ================= -->
+<section id="result" class="hidden">
+  <div class="card text-center">
+    <div class="text-[.7rem] tracking-[.24em] text-dim" id="rTitle">SELESAI</div>
+    <div class="big" id="rScore">0</div>
+    <div class="mt-[.35rem] text-[.8rem] text-dim" id="rSub"></div>
+    <div class="stats" id="rStats"></div>
+    <div id="rNew" class="mt-[1.1rem]"></div>
+    <div id="rCode" class="mt-[1.2rem]"></div>
+  </div>
+
+  <div class="card">
+    <h2>Main lagi — ganti arah kalau mau</h2>
+    <div class="switch" id="sw2">
+      <button data-dir="b2d"><span class="t">BINER → DESIMAL</span><span class="e">1011 → ?</span></button>
+      <button data-dir="d2b"><span class="t">DESIMAL → BINER</span><span class="e">11 → ?</span></button>
+    </div>
+    <div class="row">
+      <button class="btn go" id="bAgain">MAIN LAGI</button>
+      <button class="btn" id="bHome">MENU UTAMA</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SETUP KELOMPOK ================= -->
+<section id="setup" class="hidden">
+  <div class="card">
+    <h2 id="setTitle">PENGATURAN</h2>
+    <div id="setBody"></div>
+    <div class="row">
+      <button class="btn go" id="bSetGo">MULAI</button>
+      <button class="btn" id="bSetBack">BATAL</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DUEL REBUTAN ================= -->
+<section id="duel" class="hidden">
+  <div class="hud">
+    <span class="chip">DUEL · <b id="dBit">8</b>-bit</span>
+    <span class="chip">SOAL <b id="dQi">1</b>/<b id="dTot">11</b></span>
+    <span class="chip">MENANG DI <b id="dTarget">6</b></span>
+    <span class="spacer"></span>
+    <button class="icobtn" id="dQuit">KELUAR</button>
+  </div>
+  <div class="stage">
+    <div class="ask" id="dAsk">BERAPA NILAI DESIMALNYA?</div>
+    <div class="q bin" id="dQ">—</div>
+    <div class="fb" id="dFb"></div>
+  </div>
+  <div class="sides">
+    <div class="side a" id="sideA">
+      <h3><span id="dNameA">TIM A</span><b id="dScA">0</b></h3>
+      <div class="opts" id="optsA"></div>
+      <div class="lockmsg" id="dLockA"></div>
+    </div>
+    <div class="side b" id="sideB">
+      <h3><span id="dNameB">TIM B</span><b id="dScB">0</b></h3>
+      <div class="opts" id="optsB"></div>
+      <div class="lockmsg" id="dLockB"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KUIS KELAS ================= -->
+<section id="kuis" class="hidden">
+  <div class="hud">
+    <span class="chip">KUIS KELAS · <b id="kBit">8</b>-bit</span>
+    <span class="chip">SOAL <b id="kQi">0</b>/<b id="kTot">8</b></span>
+    <span class="spacer"></span>
+    <button class="icobtn" id="kQuit">KELUAR</button>
+  </div>
+  <div class="kwrap">
+    <div class="stage flex min-h-[17rem] flex-col justify-center">
+      <div class="ask" id="kAsk">TEKAN SPASI UNTUK MEMUNCULKAN SOAL</div>
+      <div class="kbig" id="kQ">—</div>
+      <div class="kcount" id="kCount"></div>
+      <div class="hint" id="kHint"></div>
+    </div>
+    <div class="card">
+      <h2>Papan skor</h2>
+      <div id="kBoard"></div>
+      <button class="btn go mt-[.7rem] w-full" id="kNext">SPASI — LANJUT</button>
+      <div class="mt-[.6rem] text-[.7rem] leading-relaxed text-dimmer">
+        Tekan <kbd>1</kbd>–<kbd>8</kbd> untuk menandai kelompok yang benar, lalu
+        <kbd>Spasi</kbd> untuk memberi poin dan lanjut.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PAPAN KELAS (GURU) ================= -->
+<section id="guru" class="hidden">
+  <div class="card">
+    <h2>Papan Kelas — rekap Kode Hasil</h2>
+    <div class="field">
+      <label>Nama murid</label>
+      <input id="gNama" placeholder="Nama murid" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Kode hasil</label>
+      <input id="gKode" placeholder="XXXX-XXXX" autocomplete="off">
+      <div class="h">Kode muncul di layar hasil murid. Kode yang diketik asal-asalan akan
+      ditolak karena tiap kode punya angka pemeriksa.</div>
+    </div>
+    <div class="row">
+      <button class="btn go" id="gAdd">TAMBAH</button>
+      <button class="btn" id="gCopy">SALIN TABEL</button>
+      <button class="btn" id="gClear">KOSONGKAN</button>
+      <button class="btn" id="gBack">← MENU</button>
+    </div>
+    <div class="lockmsg" id="gMsg"></div>
+    <div class="mt-[.9rem] overflow-x-auto">
+      <table class="board" id="gTable"></table>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+"use strict";
+/* =========================================================================
+   BIT BLITZ — Fase 1 & 2
+   Satu file, tanpa dependensi. Semua state di localStorage.
+   ========================================================================= */
+
+const $ = id => document.getElementById(id);
+const LS = 'bitblitz.v1';
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const MAXLV = 8;
+const widthOf = lv => lv + 3;                       // level 1 -> 4 bit ... level 8 -> 11 bit
+const NAMA_LV = {1:'Nibble', 4:'ASCII', 5:'SATU BYTE', 7:'Kilo', 8:'OVERFLOW'};
+const BOSS_LV = [5, 8];
+
+const BADGES = [
+  ['nibble',   'Nibble Master',    'Tembus level 4-bit'],
+  ['byte',     'Byte Lord',        'Tuntaskan level 8-bit'],
+  ['overflow', 'Overflow Survivor','Jawab benar di 11-bit'],
+  ['perfect',  'Byte Sempurna',    '10 benar beruntun'],
+  ['kilat',    'Kilat',            'Jawab di bawah 1 detik'],
+  ['nolabel',  'Tanpa Bantuan',    'Sprint tanpa label nilai tempat'],
+];
+
+const dflt = {sound:true, music:true, labelOff:false, zoom:0, badges:{}, rec:{}};
+let save = Object.assign({}, dflt, JSON.parse(localStorage.getItem(LS) || '{}'));
+const persist = () => localStorage.setItem(LS, JSON.stringify(save));
+
+/* ---------- PRNG ber-seed (menyiapkan Kode Sesi di fase 4) ---------- */
+let seed = (Date.now() ^ 0x9e3779b9) >>> 0;
+function rnd(){
+  seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+  let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+  return ((t ^ t >>> 14) >>> 0) / 4294967296;
+}
+const ri = n => Math.floor(rnd() * n);
+
+/* Kode Sesi: bila diisi, nilai soal ditentukan dari (kode, urutan soal, lebar bit),
+   sehingga dua murid pada level & urutan yang sama menerima angka yang sama. */
+let sessionCode = save.sesi || '';
+let qIndex = 0;
+function strHash(s){
+  let h = 2166136261 >>> 0;
+  for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function hash2(a, b){
+  let h = (a ^ Math.imul(b + 0x9e3779b9, 0x85ebca6b)) >>> 0;
+  h ^= h >>> 15; h = Math.imul(h, 0x2545f491) >>> 0; h ^= h >>> 13;
+  return h >>> 0;
+}
+function pickValue(w, idx){
+  const lo = 1 << (w - 2), span = ((1 << w) - 1) - lo + 1;
+  if(sessionCode) return lo + hash2(strHash(sessionCode), idx * 37 + w) % span;
+  return lo + ri(span);
+}
+
+/* =========================================================================
+   AUDIO — disintesis, tanpa file eksternal
+   ========================================================================= */
+let actx = null;
+function tone(f, dur, type, vol, delay){
+  if(!save.sound) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime + (delay || 0);
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(vol || .07, t + .012);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + .03);
+  }catch(e){}
+}
+function sfxOk(streak){
+  const base = 620 + Math.min(streak, 12) * 42;     // nada naik mengikuti rentetan
+  tone(base, .08, 'square', .06);
+  tone(base * 1.5, .12, 'square', .05, .06);
+}
+const sfxNo    = () => { tone(170,.1,'sawtooth',.08); tone(110,.28,'sawtooth',.07,.07); };
+const sfxTick  = () => tone(1500,.04,'sine',.05);
+const sfxLevel = () => { tone(523,.1,'square',.06); tone(659,.1,'square',.06,.09);
+                         tone(880,.1,'square',.06,.18); tone(1175,.22,'square',.06,.27); };
+const sfxOver  = () => { tone(330,.18,'sawtooth',.07); tone(247,.22,'sawtooth',.07,.16);
+                         tone(165,.4,'sawtooth',.07,.34); };
+const sfxBoss  = () => { tone(98,.4,'sawtooth',.09); tone(147,.4,'square',.05,.06); tone(196,.5,'sawtooth',.05,.12); };
+const sfxWin   = () => { tone(659,.1,'square',.06); tone(880,.1,'square',.06,.1);
+                         tone(1319,.3,'square',.06,.2); };
+
+/* =========================================================================
+   MUSIK LATAR — disintesis penuh, tanpa berkas audio eksternal.
+   Dua suasana: "riang" saat bermain, "panik" saat waktu menipis.
+   ========================================================================= */
+const Music = (function(){
+  let master = null, sched = null, step = 0, next = 0, on = false, mood = 'riang';
+  /* C — G — Am — F : progresi mayor yang terdengar optimis */
+  const RIANG = {bpm:112, chords:[[262,330,392],[196,247,294],[220,262,330],[175,220,262]]};
+  /* Am — Bbdim : dua akor gelap yang berselang cepat */
+  const PANIK = {bpm:170, chords:[[220,262,330],[233,277,349]]};
+
+  function ensure(){
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if(!master){
+      master = actx.createGain();
+      master.gain.value = .0001;
+      master.connect(actx.destination);
+    }
+  }
+  function ping(f, t, dur, type, vol){
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + .015);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + .03);
+  }
+  function beatAt(t){                       // denyut visual dipasang tepat saat bunyinya jatuh
+    setTimeout(() => {
+      document.body.classList.add('beat');
+      setTimeout(() => document.body.classList.remove('beat'), 110);
+    }, Math.max(0, (t - actx.currentTime) * 1000));
+  }
+  function schedule(t){
+    const P = mood === 'panik' ? PANIK : RIANG;
+    const ch = P.chords[Math.floor(step / 8) % P.chords.length];
+    const s = step % 8;
+    if(mood === 'riang'){
+      ping(ch[s % 3] * 2, t, .19, 'triangle', .05);            // arpeggio
+      if(s === 0 || s === 4) ping(ch[0] / 2, t, .32, 'sine', .10);   // bas
+      if(s % 2 === 1) ping(2300, t, .025, 'square', .011);      // ketukan tipis
+    }else{
+      ping(ch[s % 3] * 2, t, .1, 'square', .034);
+      ping(ch[0] / 2, t, .15, 'sawtooth', .075);                // bas berdetak tiap ketuk
+      if(s === 0) ping(ch[0] * 4, t, .45, 'sawtooth', .018);    // dengung tegang
+    }
+    if(s === 0) beatAt(t);
+    step++;
+  }
+  function loop(){
+    const P = mood === 'panik' ? PANIK : RIANG;
+    const dur = 60 / P.bpm / 2;
+    while(next < actx.currentTime + .15){ schedule(next); next += dur; }
+  }
+  return {
+    start(){
+      if(!save.music || on) return;
+      ensure();
+      on = true; step = 0; mood = 'riang';
+      next = actx.currentTime + .08;
+      master.gain.cancelScheduledValues(actx.currentTime);
+      master.gain.setValueAtTime(.0001, actx.currentTime);
+      master.gain.linearRampToValueAtTime(.5, actx.currentTime + 1.4);
+      sched = setInterval(loop, 25);
+    },
+    stop(){
+      if(!on) return;
+      on = false;
+      clearInterval(sched); sched = null;
+      document.documentElement.classList.remove('panik');
+      if(master){
+        const now = actx.currentTime;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(master.gain.value, now);
+        master.gain.linearRampToValueAtTime(.0001, now + .45);
+      }
+    },
+    setMood(m){
+      if(!on || mood === m) return;
+      mood = m; step = 0; next = actx.currentTime + .04;
+      document.documentElement.classList.toggle('panik', m === 'panik');
+    },
+    isOn(){ return on; }
+  };
+})();
+
+/* =========================================================================
+   KANVAS EFEK — hujan biner + ledakan partikel + konfeti
+   ========================================================================= */
+const cv = $('fx'), ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+function sizeCanvas(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  buildRain();
+}
+addEventListener('resize', sizeCanvas);
+
+let rain = [];
+function buildRain(){
+  const n = Math.round(W / 34);
+  rain = Array.from({length:n}, () => ({
+    x: rnd() * W, y: rnd() * H, sp: .28 + rnd() * .9,
+    c: '01'[ri(2)], a: .05 + rnd() * .16, s: 10 + ri(9)
+  }));
+}
+
+let parts = [];
+function burst(x, y, color, n, power){
+  if(REDUCED) return;
+  for(let i = 0; i < (n || 26); i++){
+    const ang = rnd() * Math.PI * 2, sp = (power || 4) * (.35 + rnd());
+    parts.push({x, y, vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp - 1.2,
+                life:1, col:color, sz:1.6 + rnd()*2.8, txt: rnd() < .35 ? '01'[ri(2)] : null});
+  }
+  if(parts.length > 700) parts.splice(0, parts.length - 700);
+}
+function confetti(){
+  if(REDUCED) return;
+  const cols = ['#3ef2c0','#ffd23f','#ff3fa4','#4fa8ff'];
+  for(let i = 0; i < 120; i++){
+    parts.push({x: rnd()*W, y: -20 - rnd()*H*.4, vx:(rnd()-.5)*1.6, vy:1.6+rnd()*3,
+                life:1, decay:.006, col:cols[ri(4)], sz:2+rnd()*3.4, txt:null, grav:.03});
+  }
+}
+
+function frame(){
+  ctx.clearRect(0, 0, W, H);
+  if(!REDUCED){
+    ctx.font = '600 13px ui-monospace,monospace';
+    for(const d of rain){
+      ctx.fillStyle = 'rgba(62,242,192,' + d.a + ')';
+      ctx.font = '600 ' + d.s + 'px ui-monospace,monospace';
+      ctx.fillText(d.c, d.x, d.y);
+      d.y += d.sp;
+      if(d.y > H + 14){ d.y = -14; d.x = rnd() * W; d.c = '01'[ri(2)]; }
+    }
+  }
+  for(let i = parts.length - 1; i >= 0; i--){
+    const p = parts[i];
+    p.x += p.vx; p.y += p.vy; p.vy += (p.grav || .14); p.vx *= .99;
+    p.life -= (p.decay || .022);
+    if(p.life <= 0){ parts.splice(i, 1); continue; }
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle = p.col;
+    if(p.txt){
+      ctx.font = '700 ' + (p.sz * 5) + 'px ui-monospace,monospace';
+      ctx.fillText(p.txt, p.x, p.y);
+    }else{
+      ctx.fillRect(p.x, p.y, p.sz, p.sz * 1.6);
+    }
+    ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(frame);
+}
+sizeCanvas(); frame();
+
+/* elemen -> titik tengah layar, untuk mengarahkan ledakan */
+function centerOf(el){
+  const r = el.getBoundingClientRect();
+  return {x: r.left + r.width / 2, y: r.top + r.height / 2};
+}
+function floatText(txt, x, y, col){
+  const d = document.createElement('div');
+  d.className = 'float'; d.textContent = txt;
+  d.style.left = x + 'px'; d.style.top = y + 'px';
+  if(col) d.style.color = col;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1100);
+}
+function banner(txt, col){
+  const b = $('banner'), inner = b.firstElementChild;
+  inner.textContent = txt;
+  inner.style.color = col || 'var(--color-gold)';
+  inner.style.borderColor = col || 'var(--color-gold)';
+  b.classList.remove('go'); void b.offsetWidth; b.classList.add('go');
+}
+
+/* =========================================================================
+   STATE PERMAINAN
+   ========================================================================= */
+let dir  = 'b2d';
+let mode = 'sprint';
+let G = null, timerId = null, lastTick = 0;
+/* Batas atas waktu selalu di atas waktu awal, supaya bonus waktu benar-benar terasa. */
+const capMs = () => G.timeMax + 60000;
+
+function blankGame(){
+  return {
+    lv:1, score:0, lives:3, streak:0, wrongRow:0,
+    timeLeft:90000, running:true,
+    answered:0, correct:0, bestCombo:1, maxLv:1, fastest:Infinity,
+    bossLeft:0, bossDone:{}, labelOff:false,
+    q:null, qAt:0, bits:[], locked:false, earned:[]
+  };
+}
+function comboMult(s){
+  if(s >= 15) return 5;
+  if(s >= 10) return 3;
+  if(s >= 6)  return 2;
+  if(s >= 3)  return 1.5;
+  return 1;
+}
+const timeBonus = w => w <= 6 ? 2000 : (w <= 8 ? 3000 : 4000);
+const speedMult = ms => ms < 2000 ? 2 : (ms < 4000 ? 1.5 : 1);
+
+function labelMode(lv){
+  if(mode === 'latihan') return 'show';
+  if(G && G.labelOff) return 'hide';
+  if(lv <= 4) return 'show';
+  if(lv <= 6) return 'dim';
+  return 'hide';
+}
+
+/* =========================================================================
+   SOAL
+   ========================================================================= */
+function newQuestion(){
+  const w = widthOf(G.lv);             // rentang dijaga agar angka benar-benar memakai lebar level ini
+  let v, guard = 0;
+  do { v = pickValue(w, qIndex + guard); guard++; }
+  while(G.q && v === G.q.value && guard < 12);
+  qIndex++;
+
+  G.q = {value:v, width:w, bin:v.toString(2).padStart(w, '0')};
+  G.qAt = performance.now();
+  G.bits = new Array(w).fill(0);
+  G.locked = false;
+  renderQuestion();
+}
+
+/* Bilangan biner ditampilkan menyatu, tanpa pemisah tiap 4 bit. */
+const showBin = s => s;
+
+function renderQuestion(){
+  const q = G.q, el = $('q');
+  $('bossbar').classList.toggle('hidden', G.bossLeft <= 0);
+  $('stage').classList.toggle('boss', G.bossLeft > 0);
+
+  if(dir === 'b2d'){
+    $('ask').textContent = 'BERAPA NILAI DESIMALNYA?';
+    el.textContent = showBin(q.bin);
+    el.className = 'q bin qin';
+    $('ansB2D').classList.remove('hidden');
+    $('ansD2B').classList.add('hidden');
+    $('inp').value = '';
+    $('inp').focus();
+  }else{
+    $('ask').textContent = 'NYALAKAN BIT YANG BENAR';
+    el.textContent = q.value;
+    el.className = 'q qin';
+    $('ansB2D').classList.add('hidden');
+    $('ansD2B').classList.remove('hidden');
+    buildBits();
+  }
+  updateHint();
+}
+
+function buildBits(){
+  const w = G.q.width, box = $('bits');
+  box.innerHTML = '';
+  const lm = labelMode(G.lv);
+  box.className = 'bits' + (lm === 'hide' ? ' hidelabel' : lm === 'dim' ? ' dimlabel' : '');
+  for(let i = 0; i < w; i++){
+    const place = 1 << (w - 1 - i);
+    const b = document.createElement('button');
+    b.className = 'bit' + (G.bits[i] ? ' on' : '');
+    b.innerHTML = '<span class="led"></span><span class="v">' + G.bits[i] +
+                  '</span><span class="p">' + place + '</span>';
+    b.addEventListener('click', () => toggleBit(i));
+    box.appendChild(b);
+  }
+}
+
+function toggleBit(i){
+  if(!G || G.locked || dir !== 'd2b') return;
+  G.bits[i] = G.bits[i] ? 0 : 1;
+  const el = $('bits').children[i];
+  el.classList.toggle('on', !!G.bits[i]);
+  el.querySelector('.v').textContent = G.bits[i];
+  el.classList.add('press');
+  setTimeout(() => el.classList.remove('press'), 110);
+  if(G.bits[i]){
+    const c = centerOf(el);
+    burst(c.x, c.y, '#3ef2c0', 7, 2);
+  }
+  tone(G.bits[i] ? 760 + i * 26 : 380, .045, 'square', .04);
+  updateHint();
+}
+
+const bitsValue = () => G.bits.reduce((a, b, i) => a + (b ? 1 << (G.q.width - 1 - i) : 0), 0);
+
+/* bantuan hanya di mode Latihan — sprint harus murni berhitung */
+function updateHint(){
+  const h = $('hint');
+  if(mode !== 'latihan'){ h.textContent = ''; return; }
+  if(dir === 'd2b'){
+    h.innerHTML = 'Terkumpul: <b>' + bitsValue() + '</b> · target ' + G.q.value;
+  }else{
+    const w = G.q.width;
+    h.textContent = 'Nilai tempat: ' + Array.from({length:w}, (_, i) => 1 << (w - 1 - i)).join(' · ');
+  }
+}
+
+function decompose(v, w){
+  const parts = [];
+  for(let i = 0; i < w; i++){ const p = 1 << (w - 1 - i); if(v & p) parts.push(p); }
+  return v + ' = ' + parts.join(' + ');
+}
+
+/* =========================================================================
+   ALUR
+   ========================================================================= */
+const TIMED  = m => m === 'sprint' || m === 'estafet' || m === 'maraton';
+const BERTIM = m => m === 'estafet' || m === 'maraton';
+
+function start(){
+  G = blankGame();
+  G.timeMax  = mode === 'estafet' ? 120000
+             : mode === 'maraton' ? maratonCfg.menit * 60000
+             : 90000;
+  G.timeLeft = G.timeMax;
+  G.labelOff = !!save.labelOff;
+  lastTick = 0; qIndex = 0;
+
+  if(BERTIM(mode)){
+    const cfg = mode === 'estafet' ? teamCfg : maratonCfg;
+    G.lv = cfg.lv;                                     // level dikunci guru — antar kelompok harus adil
+    G.team = {names: cfg.names.slice(), cur: 0, last: -1, hits: [], tries: [], cycle: {}};
+    G.team.names.forEach((_, i) => { G.team.hits[i] = 0; G.team.tries[i] = 0; });
+  }
+  if(mode === 'maraton'){
+    G.target = maratonCfg.target;
+    G.bestStreak = 0;
+    G.lulus = false;
+    $('mTarget').textContent = G.target;
+  }
+
+  $('home').classList.add('hidden');
+  $('result').classList.add('hidden');
+  $('setup').classList.add('hidden');
+  $('game').classList.remove('hidden');
+  $('hLivesWrap').classList.toggle('hidden', mode === 'latihan' || mode === 'maraton');
+  $('hComboWrap').classList.toggle('hidden', mode === 'maraton');
+  $('tbar').classList.toggle('hidden', !TIMED(mode));
+  $('roster').classList.toggle('hidden', mode !== 'estafet');
+  $('mline').classList.toggle('hidden', mode !== 'maraton');
+  $('bQuit').textContent = mode === 'latihan' ? 'SELESAI' : 'KELUAR';
+  $('fb').textContent = '';
+  $('vig').classList.remove('on');
+
+  newQuestion();
+  renderHUD();
+  if(mode === 'latihan'){ Music.start(); return; }   // latihan langsung jalan, tanpa hitung mundur
+  countdown(() => {
+    if(TIMED(mode)) startTimer();
+    Music.start();
+    if(mode === 'estafet'){ showTurn(); return; }
+    G.qAt = performance.now();
+  });
+}
+
+function countdown(done){
+  const box = $('count'), b = box.firstElementChild;
+  const seq = ['3', '2', '1', 'MULAI!'];
+  let i = 0;
+  G.locked = true;
+  box.classList.add('on');
+  const step = () => {
+    if(i >= seq.length){
+      box.classList.remove('on');
+      G.locked = false;
+      if(dir === 'b2d') $('inp').focus();
+      done();
+      return;
+    }
+    b.textContent = seq[i];
+    b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+    tone(i < 3 ? 440 : 880, i < 3 ? .1 : .3, 'square', .07);
+    i++;
+    setTimeout(step, i === seq.length ? 420 : 700);
+  };
+  step();
+}
+
+function startTimer(){
+  stopTimer();
+  let prev = performance.now();
+  timerId = setInterval(() => {
+    const now = performance.now();
+    G.timeLeft -= (now - prev); prev = now;
+    if(G.timeLeft <= 0){ G.timeLeft = 0; renderTimer(); return over('WAKTU HABIS'); }
+    renderTimer();
+    Music.setMood(G.timeLeft < 20000 ? 'panik' : 'riang');
+    const s = Math.ceil(G.timeLeft / 1000);
+    if(s <= 10 && s !== lastTick){ lastTick = s; sfxTick(); }
+  }, 60);
+}
+function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+
+function renderTimer(){
+  $('tfill').style.width = Math.max(0, Math.min(100, G.timeLeft / G.timeMax * 100)) + '%';
+  const warn = G.timeLeft < 10000;
+  $('tbar').classList.toggle('warn', warn);
+  $('vig').classList.toggle('on', warn);
+}
+
+function renderHUD(){
+  $('hLv').textContent  = G.lv;
+  $('hBit').textContent = widthOf(G.lv);
+  $('hSc').textContent  = G.score;
+  $('hLives').innerHTML = '♥'.repeat(Math.max(0, G.lives)) +
+    '<span class="off">' + '♡'.repeat(Math.max(0, 3 - G.lives)) + '</span>';
+
+  let lad = '';
+  for(let i = 1; i <= MAXLV; i++){
+    lad += '<i class="' + (i <= G.lv ? (BOSS_LV.indexOf(i) >= 0 ? 'boss' : 'on') : '') + '"></i>';
+  }
+  $('ladder').innerHTML = lad;
+
+  const m = comboMult(G.streak), c = $('hCombo');
+  c.textContent = '×' + m + (G.streak >= 6 ? ' 🔥' : G.streak >= 3 ? ' ✦' : '');
+  c.className = m >= 5 ? 'c5' : m >= 3 ? 'c3' : m >= 2 ? 'c2' : m >= 1.5 ? 'c15' : 'c1';
+  if(m > 1){ c.classList.add('pop'); setTimeout(() => c.classList.remove('pop'), 420); }
+
+  const R = document.documentElement.classList;          // latar memanas mengikuti combo
+  R.toggle('hot1', m >= 1.5 && m < 2);
+  R.toggle('hot2', m >= 2 && m < 5);
+  R.toggle('hot3', m >= 5);
+
+  if(TIMED(mode)) renderTimer();
+  if(mode === 'estafet') renderRoster();
+  if(mode === 'maraton') renderMaraton();
+}
+
+function renderRoster(){
+  const t = G.team;
+  $('roster').innerHTML = t.names.map((n, i) =>
+    '<span class="pl' + (i === t.cur ? ' now' : '') + '">' + esc(n) +
+    ' <b class="text-acc">' + t.hits[i] + '</b>/' + t.tries[i] + '</span>').join('');
+}
+
+function renderMaraton(){
+  const t = G.team, pct = Math.min(100, G.streak / G.target * 100);
+  $('mWho').textContent = (t.cur + 1) + '. ' + t.names[t.cur];
+  $('mStreak').textContent = G.streak;
+  $('mFill').style.width = pct + '%';
+  $('mBar').classList.toggle('near', G.streak >= G.target - 3);
+}
+
+function submit(){
+  if(!G || !G.running || G.locked) return;
+  let given;
+  if(dir === 'b2d'){
+    const raw = $('inp').value.trim();
+    if(raw === '') return;
+    given = parseInt(raw, 10);
+    if(isNaN(given)) return;
+  }else{
+    given = bitsValue();
+  }
+  G.locked = true;
+  const dt = performance.now() - G.qAt;
+  G.answered++;
+  (given === G.q.value) ? onCorrect(dt) : onWrong();
+}
+
+function onCorrect(dt){
+  const w = G.q.width;
+  G.correct++; G.streak++; G.wrongRow = 0;
+  G.fastest = Math.min(G.fastest, dt);
+
+  const cm = comboMult(G.streak), sm = speedMult(dt), boss = G.bossLeft > 0 ? 2 : 1;
+  const pts = Math.round(w * 10 * cm * sm * boss);
+  G.score += pts;
+  G.bestCombo = Math.max(G.bestCombo, cm);
+  if(TIMED(mode)) G.timeLeft = Math.min(capMs(), G.timeLeft + timeBonus(w));
+
+  if(BERTIM(mode)){
+    const t = G.team;
+    t.hits[t.cur]++; t.tries[t.cur]++;
+    t.last = t.cur;
+  }
+  if(mode === 'estafet'){
+    const t = G.team;
+    t.cycle[t.cur] = true;
+    if(Object.keys(t.cycle).length >= t.names.length){   // semua anggota kebagian benar
+      t.cycle = {};
+      G.timeLeft = Math.min(capMs(), G.timeLeft + 8000);
+      setTimeout(() => { banner('PUTARAN PENUH! +8 DETIK', 'var(--color-acc)'); sfxWin(); }, 320);
+    }
+  }
+  if(mode === 'maraton'){
+    G.bestStreak = Math.max(G.bestStreak, G.streak);
+    if(G.streak >= G.target){                           // target tercapai — kelas lulus
+      G.lulus = true;
+      renderHUD();
+      banner('🎉 LULUS! RENTETAN ' + G.streak + ' 🎉', 'var(--color-acc)');
+      confetti(); confetti();
+      return setTimeout(() => over('LULUS'), 900);
+    }
+    if(G.streak === G.target - 3) banner('TINGGAL 3 LAGI!', 'var(--color-mag)');
+  }
+
+  if(w === 11)        grant('overflow');
+  if(dt < 1000)       grant('kilat');
+  if(G.streak >= 10)  grant('perfect');
+
+  const c = centerOf($('q'));
+  burst(c.x, c.y, boss > 1 ? '#ff3fa4' : '#3ef2c0', 20 + Math.min(G.streak, 14) * 3, 3 + Math.min(cm, 5));
+  floatText('+' + pts, c.x, c.y, boss > 1 ? '#ff3fa4' : null);
+
+  const line = ['BENAR  <span class="plus">+' + pts + '</span>'];
+  if(TIMED(mode)) line.push('<span class="plus">+' + (timeBonus(w) / 1000) + 's</span>');
+  if(cm > 1)   line.push('combo ×' + cm);
+  if(sm > 1)   line.push('cepat ×' + sm);
+  if(boss > 1) line.push('BOSS ×2');
+  say(line.join('  ·  '), 'ok');
+  sfxOk(G.streak);
+
+  if(G.bossLeft > 0){
+    G.bossLeft--;
+    if(G.bossLeft === 0){
+      banner('BOSS TAKLUK!', 'var(--color-mag)');
+      confetti(); sfxWin();
+    }
+  }else if(G.streak % 5 === 0 && !BERTIM(mode)){
+    levelUp();                          // level mode kelompok dikunci guru, tidak ikut naik
+  }
+
+  renderHUD();
+  next(680);
+}
+
+function levelUp(){
+  if(G.lv >= MAXLV){ G.maxLv = Math.max(G.maxLv, G.lv); return; }
+  G.lv++;
+  G.maxLv = Math.max(G.maxLv, G.lv);
+  if(G.lv >= 2) grant('nibble');
+  if(G.lv >= 6) grant('byte');
+  sfxLevel();
+  const nm = NAMA_LV[G.lv] ? ' · ' + NAMA_LV[G.lv] : '';
+  banner('LEVEL ' + G.lv + ' — ' + widthOf(G.lv) + ' BIT' + nm);
+  say('▲ NAIK KE LEVEL ' + G.lv + ' · ' + widthOf(G.lv) + '-BIT' + nm, 'ok');
+  if(BOSS_LV.indexOf(G.lv) >= 0 && !G.bossDone[G.lv]){
+    G.bossDone[G.lv] = true;
+    G.bossLeft = 3;
+    setTimeout(() => { banner('⚡ BOSS ROUND ⚡', 'var(--color-mag)'); sfxBoss(); }, 700);
+  }
+}
+
+function onWrong(){
+  G.streak = 0; G.wrongRow++;
+  const wasBoss = G.bossLeft > 0;
+  G.bossLeft = 0;
+
+  if(mode !== 'latihan' && mode !== 'maraton') G.lives--;   // maraton tidak pakai nyawa
+  if(TIMED(mode))  G.timeLeft = Math.max(0, G.timeLeft - 4000);
+  if(BERTIM(mode)){ G.team.tries[G.team.cur]++; G.team.last = G.team.cur; }
+  if(mode === 'maraton') setTimeout(() => banner('RENTETAN PUTUS — MULAI LAGI DARI 0', 'var(--color-bad)'), 200);
+
+  let msg = 'SALAH · jawabannya <b>' + (dir === 'b2d' ? G.q.value : showBin(G.q.bin)) + '</b>';
+  if(TIMED(mode)) msg += '  <span class="text-bad">−4s</span>';
+  if(wasBoss)           msg += '  · gugur dari boss round';
+  if(mode === 'latihan') msg += '<br>' + decompose(G.q.value, G.q.width);
+  say(msg, 'no');
+  sfxNo();
+
+  const st = $('stage');
+  st.classList.add('shake'); setTimeout(() => st.classList.remove('shake'), 320);
+  $('hitflash').classList.remove('go'); void $('hitflash').offsetWidth; $('hitflash').classList.add('go');
+
+  if(mode !== 'survival' && !BERTIM(mode) && G.wrongRow >= 2 && G.lv > 1){
+    G.lv--; G.wrongRow = 0;
+    setTimeout(() => say('▼ Turun ke level ' + G.lv + ' · ' + widthOf(G.lv) +
+      '-bit — santai, kuatkan dulu di sini.', 'no'), 950);
+  }
+
+  renderHUD();
+  if(mode !== 'latihan' && mode !== 'maraton' && G.lives <= 0) return over('NYAWA HABIS');
+  next(mode === 'latihan' ? 2300 : 1550);
+}
+
+const say = (html, cls) => { const f = $('fb'); f.innerHTML = html; f.className = 'fb ' + cls; };
+const next = ms => setTimeout(() => {
+  if(!G || !G.running) return;
+  if(mode === 'estafet'){ showTurn(); return; }        // estafet: tim memilih penjawab
+  if(mode === 'maraton') advanceTurn();                // maraton: langsung maju, tanpa jeda memilih
+  newQuestion();
+  renderHUD();
+}, ms);
+
+/* Maraton berjalan berurutan tanpa layar pemilihan — nama penjawab berikutnya
+   cukup ditegaskan di baris giliran supaya tidak memakan waktu. */
+function advanceTurn(){
+  const t = G.team;
+  if(t.last >= 0) t.cur = (t.last + 1) % t.names.length;
+  const w = $('mWho');
+  w.classList.remove('ganti'); void w.offsetWidth; w.classList.add('ganti');
+  tone(880, .05, 'square', .045);
+}
+
+/* ---- estafet: tim memilih sendiri siapa yang menjawab ---- */
+function showTurn(){
+  const t = G.team;
+  G.locked = true;
+  $('picks').innerHTML = t.names.map((n, i) =>
+    '<button class="pick" data-i="' + i + '"' + (i === t.last && t.names.length > 1 ? ' disabled' : '') +
+    '>' + esc(n) + '<small>' + (i === t.last && t.names.length > 1
+      ? 'baru saja menjawab' : t.hits[i] + ' benar · ' + t.tries[i] + ' soal') + '</small></button>').join('');
+  $('turn').classList.add('on');
+}
+$('picks').addEventListener('click', e => {
+  const b = e.target.closest('button[data-i]');
+  if(!b || b.disabled) return;
+  G.team.cur = +b.dataset.i;
+  $('turn').classList.remove('on');
+  tone(760, .06, 'square', .05);
+  newQuestion();
+  renderHUD();
+});
+
+/* =========================================================================
+   LENCANA · REKOR · SELESAI
+   ========================================================================= */
+function grant(id){
+  if(save.badges[id]) return;
+  save.badges[id] = true; persist();
+  if(G) G.earned.push(id);
+}
+
+function countUp(el, to){
+  const t0 = performance.now(), dur = 900;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+    if(k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function over(reason){
+  if(!G || !G.running) return;
+  G.running = false; stopTimer(); Music.stop();
+  $('vig').classList.remove('on');
+  $('turn').classList.remove('on');
+  document.documentElement.classList.remove('hot1', 'hot2', 'hot3');
+
+  if(mode === 'sprint' && G.labelOff && G.score > 0) grant('nolabel');
+  G.maxLv = Math.max(G.maxLv, G.lv);
+
+  /* Faktor pemerataan: tim yang semua anggotanya pernah menjawab benar dapat sampai +20%. */
+  let merata = 1, ikut = 0;
+  if(mode === 'estafet'){
+    const t = G.team;
+    ikut = t.hits.filter(h => h > 0).length;
+    merata = 1 + .2 * (ikut / t.names.length);
+    G.rawScore = G.score;
+    G.score = Math.round(G.score * merata);
+  }
+
+  const key = mode + ':' + dir;
+  const r = save.rec[key] || {score:0, lv:0, combo:0};
+  const isNew = G.score > r.score && mode !== 'latihan';
+  save.rec[key] = {
+    score: Math.max(r.score, G.score),
+    lv:    Math.max(r.lv, G.maxLv),
+    combo: Math.max(r.combo, G.bestCombo)
+  };
+  persist();
+
+  const acc = G.answered ? Math.round(G.correct / G.answered * 100) : 0;
+  $('rTitle').textContent = reason + (isNew ? ' · REKOR BARU!' : '');
+  const NAMA_MODE = {sprint:'Solo Sprint', survival:'Survival', latihan:'Latihan',
+                     estafet:'Estafet Bit', maraton:'Maraton Kelas'};
+  $('rSub').textContent = NAMA_MODE[mode] +
+    ' · ' + (dir === 'b2d' ? 'Biner → Desimal' : 'Desimal → Biner') +
+    (sessionCode ? ' · sesi ' + sessionCode : '');
+
+  const rows = [
+    ['Akurasi', acc + '%'],
+    ['Benar', G.correct + '/' + G.answered],
+    ['Level tertinggi', G.maxLv + ' · ' + widthOf(G.maxLv) + '-bit'],
+    ['Combo terbaik', '×' + G.bestCombo],
+    ['Tercepat', G.fastest === Infinity ? '—' : (G.fastest / 1000).toFixed(2) + 's']
+  ];
+  if(mode === 'estafet'){
+    rows.push(['Skor mentah', G.rawScore]);
+    rows.push(['Pemerataan', '×' + merata.toFixed(2) + ' (' + ikut + '/' + G.team.names.length + ')']);
+  }
+  if(mode === 'maraton'){
+    const ikutSerta = G.team.hits.filter(h => h > 0).length;
+    rows.length = 0;                                   // maraton dinilai dari rentetan, bukan skor
+    rows.push(['Rentetan terbaik', G.bestStreak + ' / ' + G.target]);
+    rows.push(['Hasil', G.lulus ? 'LULUS' : 'Belum lulus']);
+    rows.push(['Akurasi kelas', acc + '%']);
+    rows.push(['Benar', G.correct + '/' + G.answered]);
+    rows.push(['Peserta menjawab benar', ikutSerta + '/' + G.team.names.length]);
+    rows.push(['Waktu terpakai', Math.round((G.timeMax - G.timeLeft) / 60000) + ' menit']);
+    rows.push(['Tingkat', widthOf(G.lv) + '-bit']);
+  }
+  $('rStats').innerHTML = rows.map(s =>
+    '<div class="stat"><div class="l">' + s[0] + '</div><div class="v">' + s[1] + '</div></div>').join('');
+
+  $('rNew').innerHTML = G.earned.length
+    ? '<div class="mb-[.55rem] text-[.68rem] tracking-[.2em] text-dim">LENCANA BARU</div>' +
+      '<div class="badges">' + G.earned.map(id => {
+        const b = BADGES.find(x => x[0] === id);
+        return '<span class="badge got new">🏅 ' + b[1] + '</span>';
+      }).join('') + '</div>'
+    : '';
+
+  if(BERTIM(mode)){
+    const t = G.team;
+    $('rCode').innerHTML =
+      '<div class="mb-[.55rem] text-[.68rem] tracking-[.2em] text-dim">KONTRIBUSI PESERTA</div>' +
+      '<div class="roster m-0">' + t.names.map((n, i) =>
+        '<span class="pl' + (t.hits[i] > 0 ? '' : '') + '">' + esc(n) +
+        ' <b class="' + (t.hits[i] ? 'text-acc' : 'text-bad') + '">' + t.hits[i] +
+        '</b>/' + t.tries[i] + '</span>').join('') + '</div>';
+  }else{
+    const md = ({sprint:0, survival:1, latihan:2}[mode] || 0) * 2 + (dir === 'b2d' ? 0 : 1);
+    const code = encodeResult(G.score, G.maxLv, acc, md);
+    $('rCode').innerHTML =
+      '<div class="mb-2 text-[.68rem] tracking-[.2em] text-dim">KODE HASIL — SETORKAN KE GURU</div>' +
+      '<div class="codebox">' + code + '</div>' +
+      '<div class="mt-2 text-[.72rem] text-dimmer">' +
+      'Kode ini memuat skor, level, dan akurasimu. Tidak bisa dikarang.</div>';
+  }
+
+  $('game').classList.add('hidden');
+  $('result').classList.remove('hidden');
+  paintSwitch($('sw2'));
+  renderHome();
+  if(mode === 'maraton'){
+    $('rTitle').textContent = G.lulus ? '🎉 KELAS LULUS!' : 'WAKTU HABIS — BELUM LULUS';
+    $('rScore').style.color = G.lulus ? 'var(--color-acc)' : 'var(--color-bad)';
+    countUp($('rScore'), G.bestStreak);
+    if(G.lulus){ confetti(); confetti(); sfxWin(); } else sfxOver();
+  }else{
+    $('rScore').style.color = '';
+    countUp($('rScore'), G.score);
+    if(isNew){ confetti(); sfxWin(); } else { sfxOver(); }
+  }
+}
+
+function renderHome(){
+  const modes = [['sprint','Solo Sprint'], ['survival','Survival']];
+  const dirs  = [['b2d','B→D'], ['d2b','D→B']];
+  let html = '';
+  modes.forEach(m => dirs.forEach(d => {
+    const r = save.rec[m[0] + ':' + d[0]];
+    html += '<div class="stat"><div class="l">' + m[1] + ' ' + d[1] + '</div>' +
+            '<div class="v">' + (r ? r.score : '—') + '</div></div>';
+  }));
+  $('recs').innerHTML = html;
+  $('badgeList').innerHTML = BADGES.map(b =>
+    '<span class="badge' + (save.badges[b[0]] ? ' got' : '') + '" title="' + b[2] + '">' +
+    (save.badges[b[0]] ? '🏅 ' : '🔒 ') + b[1] + '</span>').join('');
+}
+
+/* =========================================================================
+   UI
+   ========================================================================= */
+function paintSwitch(box){
+  [...box.querySelectorAll('button')].forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.dir === dir ? 'true' : 'false'));
+}
+function wireSwitch(box){
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button[data-dir]');
+    if(!b) return;
+    dir = b.dataset.dir;
+    paintSwitch($('sw')); paintSwitch($('sw2'));
+    const c = centerOf(b); burst(c.x, c.y, '#3ef2c0', 14, 2.6);
+    tone(720, .05, 'square', .05);
+  });
+}
+wireSwitch($('sw')); wireSwitch($('sw2'));
+
+const GROUP_MODES = ['estafet','maraton','duel','kuis'];
+document.querySelectorAll('.mode').forEach(b =>
+  b.addEventListener('click', () => {
+    const m = b.dataset.mode;
+    if(GROUP_MODES.indexOf(m) >= 0) openSetup(m);      // kelompok lewat layar pengaturan dulu
+    else { mode = m; start(); }
+  }));
+
+$('bSend').addEventListener('click', submit);
+$('bSend2').addEventListener('click', submit);
+/* Enter ditangani satu pintu di listener dokumen, agar tidak terkirim dua kali */
+
+function paintLabelBtn(){
+  const on = !!save.labelOff;
+  $('bLabel').setAttribute('aria-pressed', on);
+  $('bLabel').textContent = 'LABEL NILAI TEMPAT: ' + (on ? 'MATI (AHLI)' : 'OTOMATIS');
+}
+$('bLabel').addEventListener('click', () => {
+  save.labelOff = !save.labelOff; persist(); paintLabelBtn();
+  tone(save.labelOff ? 440 : 760, .06, 'square', .05);
+});
+
+$('bQuit').addEventListener('click', () => {
+  if(!G) return;
+  if(mode === 'latihan'){ over('LATIHAN SELESAI'); return; }
+  G.running = false; stopTimer(); Music.stop();
+  $('mline').classList.add('hidden');
+  $('vig').classList.remove('on');
+  $('turn').classList.remove('on');
+  $('game').classList.add('hidden');
+  $('home').classList.remove('hidden');
+  renderHome();
+});
+$('bAgain').addEventListener('click', () => {
+  $('result').classList.add('hidden');
+  if(mode === 'duel')      startDuel();
+  else if(mode === 'kuis') startKuis();
+  else                     start();
+});
+$('bHome').addEventListener('click', () => {
+  $('result').classList.add('hidden'); $('home').classList.remove('hidden'); renderHome();
+});
+
+$('bSound').addEventListener('click', () => {
+  save.sound = !save.sound; persist();
+  $('bSound').setAttribute('aria-pressed', save.sound);
+  $('bSound').textContent = save.sound ? '♪' : '✕';
+  if(save.sound) tone(880, .08, 'square', .06);
+});
+$('bMusic').addEventListener('click', () => {
+  save.music = !save.music; persist();
+  $('bMusic').setAttribute('aria-pressed', save.music);
+  $('bMusic').textContent = save.music ? '♫' : '♫̸';
+  if(!save.music) Music.stop();
+  else if(G && G.running) Music.start();          // nyalakan lagi di tengah permainan
+});
+/* perbesaran: NORMAL → BESAR → TV, tersimpan antar pertemuan */
+const ZOOM_LABEL = ['⛶ NORMAL', '⛶ BESAR', '⛶ TV'];
+function applyZoom(){
+  const z = save.zoom || 0;
+  document.documentElement.classList.toggle('zoom1', z === 1);
+  document.documentElement.classList.toggle('zoom2', z === 2);
+  $('bProj').textContent = ZOOM_LABEL[z];
+  $('bProj').setAttribute('aria-pressed', z > 0);
+  sizeCanvas();
+}
+$('bProj').addEventListener('click', () => {
+  save.zoom = ((save.zoom || 0) + 1) % 3; persist(); applyZoom();
+  tone(560 + (save.zoom || 0) * 180, .06, 'square', .05);
+});
+
+/* papan ketik: 1..9 0 - untuk 11 posisi bit, Enter untuk kirim */
+const KEYMAP = ['1','2','3','4','5','6','7','8','9','0','-'];
+document.addEventListener('keydown', e => {
+  if($('game').classList.contains('hidden')) return;
+  if(e.key === 'Enter'){ e.preventDefault(); submit(); return; }
+  if(dir !== 'd2b' || !G || G.locked) return;
+  const i = KEYMAP.indexOf(e.key);
+  if(i >= 0 && i < G.q.width){ e.preventDefault(); toggleBit(i); }
+});
+
+/* =========================================================================
+   UTILITAS BERSAMA
+   ========================================================================= */
+function esc(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+/* ---- Kode Hasil: base32 + satu karakter pemeriksa ---- */
+const A32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';   // tanpa I L O U agar tidak salah baca
+function encodeResult(score, lv, acc, md){
+  score = Math.min(999999, Math.max(0, Math.round(score)));
+  let n = ((score * 9 + lv) * 101 + acc) * 6 + md, s = '';
+  for(let i = 0; i < 7; i++){ s = A32[n % 32] + s; n = Math.floor(n / 32); }
+  let sum = 0;
+  for(let i = 0; i < 7; i++) sum = (sum * 7 + A32.indexOf(s[i])) % 32;
+  s += A32[sum];
+  return s.slice(0, 4) + '-' + s.slice(4);
+}
+function decodeResult(code){
+  const s = (code || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if(s.length !== 8) return null;
+  let sum = 0;
+  for(let i = 0; i < 7; i++){
+    const d = A32.indexOf(s[i]);
+    if(d < 0) return null;
+    sum = (sum * 7 + d) % 32;
+  }
+  if(A32[sum] !== s[7]) return null;
+  let n = 0;
+  for(let i = 0; i < 7; i++) n = n * 32 + A32.indexOf(s[i]);
+  const md = n % 6; n = Math.floor(n / 6);
+  const acc = n % 101; n = Math.floor(n / 101);
+  const lv = n % 9; n = Math.floor(n / 9);
+  if(lv < 1 || lv > MAXLV || acc > 100) return null;
+  return {score:n, lv, acc, md};
+}
+const MD_LABEL = ['Sprint B→D','Sprint D→B','Survival B→D','Survival D→B','Latihan B→D','Latihan D→B'];
+
+/* =========================================================================
+   PENGATURAN MODE KELOMPOK
+   ========================================================================= */
+let teamCfg = {names:['Anggota 1','Anggota 2','Anggota 3','Anggota 4'], lv:5};
+let maratonCfg = {names:[], jumlah:30, lv:5, menit:20, target:15};
+let duelCfg = {a:'TIM A', b:'TIM B', lv:5, total:11, target:6};
+let kuisCfg = {names:['Kelompok 1','Kelompok 2','Kelompok 3','Kelompok 4'], lv:5, total:8, taruhan:true};
+
+function lvOptions(sel){
+  let o = '';
+  for(let i = 1; i <= MAXLV; i++){
+    const w = widthOf(i);
+    o += '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>Level ' + i +
+         ' — ' + w + '-bit (0–' + ((1 << w) - 1) + ')</option>';
+  }
+  return o;
+}
+const parseNames = (txt, fb) => {
+  const a = txt.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+  return a.length ? a : fb;
+};
+
+function openSetup(m){
+  mode = m;
+  $('home').classList.add('hidden');
+  $('result').classList.add('hidden');
+  $('setup').classList.remove('hidden');
+  $('setTitle').textContent =
+    ({estafet:'ESTAFET BIT — PENGATURAN', duel:'DUEL REBUTAN — PENGATURAN',
+      kuis:'KUIS KELAS — PENGATURAN', maraton:'MARATON KELAS — PENGATURAN'})[m];
+
+  if(m === 'maraton'){
+    $('setBody').innerHTML =
+      '<div class="field"><label>Nama peserta (satu per baris) — boleh dikosongkan</label>' +
+      '<textarea id="fNames" placeholder="Ayu&#10;Budi&#10;Citra&#10;…">' +
+      esc(maratonCfg.names.join('\n')) + '</textarea>' +
+      '<div class="h">Tanpa batas jumlah. Kalau dikosongkan, peserta dinomori otomatis ' +
+      'sesuai jumlah di bawah — praktis kalau murid sudah punya nomor absen.</div></div>' +
+      '<div class="field"><label>Jumlah peserta (kalau nama dikosongkan)</label>' +
+      '<input id="fJumlah" type="number" min="2" max="200" value="' + maratonCfg.jumlah + '"></div>' +
+      '<div class="field"><label>Target rentetan benar</label>' +
+      '<input id="fTarget" type="number" min="3" max="200" value="' + maratonCfg.target + '">' +
+      '<div class="h">Kelas dinyatakan <b>lulus</b> begitu target tercapai. ' +
+      'Satu orang salah, rentetan kembali ke nol — jadi seluruh kelas harus saling menjaga.</div></div>' +
+      '<div class="field"><label>Durasi (menit)</label>' +
+      '<input id="fMenit" type="number" min="1" max="120" value="' + maratonCfg.menit + '"></div>' +
+      '<div class="field"><label>Tingkat kesulitan</label><select id="fLv">' + lvOptions(maratonCfg.lv) +
+      '</select><div class="h">Giliran berjalan berurutan dari nomor 1. Tidak ada nyawa — ' +
+      'kelas boleh terus mencoba sampai waktu habis.</div></div>';
+  }else if(m === 'estafet'){
+    $('setBody').innerHTML =
+      '<div class="field"><label>Nama anggota (satu per baris)</label>' +
+      '<textarea id="fNames">' + esc(teamCfg.names.join('\n')) + '</textarea>' +
+      '<div class="h">Minimal 2, tanpa batas atas. Tim memilih sendiri siapa yang menjawab tiap soal, ' +
+      'tapi satu orang <b>tidak boleh menjawab dua kali berturut-turut</b>. ' +
+      'Nyawa dipakai bersama, dan tiap kali semua anggota sudah menjawab benar tim dapat +8 detik.</div></div>' +
+      '<div class="field"><label>Tingkat kesulitan</label><select id="fLv">' + lvOptions(teamCfg.lv) +
+      '</select><div class="h">Level dikunci di sini — antar kelompok harus dapat soal setara agar adil.</div></div>';
+  }else if(m === 'duel'){
+    $('setBody').innerHTML =
+      '<div class="field"><label>Nama tim kiri</label><input id="fA" value="' + esc(duelCfg.a) + '"></div>' +
+      '<div class="field"><label>Nama tim kanan</label><input id="fB" value="' + esc(duelCfg.b) + '"></div>' +
+      '<div class="field"><label>Tingkat kesulitan</label><select id="fLv">' + lvOptions(duelCfg.lv) + '</select></div>' +
+      '<div class="field"><label>Menang di berapa poin</label><input id="fTarget" type="number" min="1" max="20" value="' + duelCfg.target + '">' +
+      '<div class="h">Tim kiri memakai tombol <b>Q W A S</b>, tim kanan tombol <b>panah</b>. ' +
+      'Di layar sentuh, tiap tim cukup mengetuk sisinya sendiri. Salah jawab = terkunci 3 detik.</div></div>';
+  }else{
+    $('setBody').innerHTML =
+      '<div class="field"><label>Nama kelompok (satu per baris)</label>' +
+      '<textarea id="fNames">' + esc(kuisCfg.names.join('\n')) + '</textarea>' +
+      '<div class="h">Minimal 2. Tombol <b>1</b>–<b>9</b> menandai sembilan kelompok pertama; ' +
+      'selebihnya ditandai dengan mengetuk barisnya.</div></div>' +
+      '<div class="field"><label>Tingkat kesulitan</label><select id="fLv">' + lvOptions(kuisCfg.lv) + '</select></div>' +
+      '<div class="field"><label>Jumlah soal</label><input id="fTotal" type="number" min="2" max="30" value="' + kuisCfg.total + '"></div>' +
+      '<div class="field"><label><input type="checkbox" id="fTaruhan" class="mr-2 w-auto"' +
+      (kuisCfg.taruhan ? ' checked' : '') + '>Soal terakhir jadi Ronde Taruhan</label>' +
+      '<div class="h">Tiap kelompok mempertaruhkan sebagian poinnya sebelum soal muncul. ' +
+      'Benar = ditambah, salah = dikurangi. Kelompok yang tertinggal masih bisa membalik keadaan.</div></div>';
+  }
+}
+
+$('bSetBack').addEventListener('click', () => {
+  $('setup').classList.add('hidden'); $('home').classList.remove('hidden');
+});
+$('bSetGo').addEventListener('click', () => {
+  const lv = +($('fLv') || {value:5}).value || 5;
+  if(mode === 'maraton'){
+    const jumlah = Math.max(2, Math.min(200, +$('fJumlah').value || 30));
+    let names = parseNames($('fNames').value, []);
+    if(!names.length) names = Array.from({length:jumlah}, (_, i) => 'Peserta ' + (i + 1));
+    maratonCfg = {
+      names, jumlah, lv,
+      menit:  Math.max(1, Math.min(120, +$('fMenit').value  || 20)),
+      target: Math.max(3, Math.min(200, +$('fTarget').value || 15))
+    };
+    start();
+  }else if(mode === 'estafet'){
+    const names = parseNames($('fNames').value, teamCfg.names);
+    if(names.length < 2) return alert('Minimal 2 anggota.');
+    teamCfg = {names, lv};
+    start();
+  }else if(mode === 'duel'){
+    duelCfg.a = $('fA').value.trim() || 'TIM A';
+    duelCfg.b = $('fB').value.trim() || 'TIM B';
+    duelCfg.lv = lv;
+    duelCfg.target = Math.max(1, Math.min(20, +$('fTarget').value || 6));
+    duelCfg.total = duelCfg.target * 2 - 1;
+    startDuel();
+  }else{
+    const names = parseNames($('fNames').value, kuisCfg.names);
+    if(names.length < 2) return alert('Minimal 2 kelompok.');
+    kuisCfg = {names, lv, total: Math.max(2, Math.min(30, +$('fTotal').value || 8)),
+               taruhan: $('fTaruhan').checked};
+    startKuis();
+  }
+});
+
+/* =========================================================================
+   DUEL REBUTAN
+   ========================================================================= */
+let D = null;
+const KEYS_A = ['Q','W','A','S'], KEYS_B = ['↑','→','←','↓'];
+
+function makeOptions(v, w){
+  const hi = (1 << w) - 1, set = new Set([v]);
+  let guard = 0;
+  while(set.size < 4 && guard++ < 80){
+    const k = ri(3);
+    let x = k === 0 ? v ^ (1 << ri(w))                 // satu bit dibalik
+          : k === 1 ? v + (ri(2) ? 1 : -1)             // meleset satu
+                    : v ^ (3 << ri(Math.max(1, w - 1)));  // dua bit bersebelahan
+    if(x >= 0 && x <= hi && x !== v) set.add(x);
+  }
+  while(set.size < 4) set.add(ri(hi + 1));
+  const arr = [...set];
+  for(let i = arr.length - 1; i > 0; i--){ const j = ri(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  return arr;
+}
+
+function startDuel(){
+  mode = 'duel';
+  D = {sc:[0,0], qi:0, lock:[0,0], q:null, opts:[], open:false, done:false, tid:[null,null]};
+  qIndex = 0;
+  $('setup').classList.add('hidden'); $('result').classList.add('hidden');
+  $('duel').classList.remove('hidden');
+  $('dNameA').textContent = duelCfg.a;
+  $('dNameB').textContent = duelCfg.b;
+  $('dBit').textContent = widthOf(duelCfg.lv);
+  $('dTot').textContent = duelCfg.total;
+  $('dTarget').textContent = duelCfg.target;
+  Music.start();
+  duelNext();
+}
+
+function duelNext(){
+  if(D.sc[0] >= duelCfg.target || D.sc[1] >= duelCfg.target || D.qi >= duelCfg.total) return duelOver();
+  D.tid.forEach(t => t && clearInterval(t));
+  D.qi++;
+  const w = widthOf(duelCfg.lv), v = pickValue(w, qIndex++);
+  D.q = {value:v, width:w, bin:v.toString(2).padStart(w, '0')};
+  D.opts = makeOptions(v, w);
+  D.lock = [0, 0]; D.open = true;
+  $('dQi').textContent = D.qi;
+  if(dir === 'b2d'){
+    $('dAsk').textContent = 'BERAPA NILAI DESIMALNYA?';
+    $('dQ').textContent = showBin(D.q.bin); $('dQ').className = 'q bin qin';
+  }else{
+    $('dAsk').textContent = 'MANA BENTUK BINERNYA?';
+    $('dQ').textContent = v; $('dQ').className = 'q qin';
+  }
+  $('dFb').textContent = ''; $('dLockA').textContent = ''; $('dLockB').textContent = '';
+  $('sideA').classList.remove('lock'); $('sideB').classList.remove('lock');
+  const fmt = x => dir === 'b2d' ? x : showBin(x.toString(2).padStart(D.q.width, '0'));
+  ['A','B'].forEach(sd => {
+    const keys = sd === 'A' ? KEYS_A : KEYS_B;
+    $('opts' + sd).innerHTML = D.opts.map((x, i) =>
+      '<button class="opt" data-s="' + (sd === 'A' ? 0 : 1) + '" data-i="' + i + '">' +
+      fmt(x) + '<span class="kk">' + keys[i] + '</span></button>').join('');
+  });
+  $('dScA').textContent = D.sc[0]; $('dScB').textContent = D.sc[1];
+}
+
+function duelAnswer(s, i){
+  if(!D || D.done || !D.open || D.lock[s] > 0) return;
+  const sd = s ? 'B' : 'A';
+  const el = $('opts' + sd).children[i];
+  if(!el) return;
+  if(D.opts[i] === D.q.value){
+    D.open = false;
+    D.sc[s]++;
+    el.classList.add('right');
+    const c = centerOf(el);
+    burst(c.x, c.y, s ? '#ff3fa4' : '#3ef2c0', 34, 5);
+    sfxOk(6);
+    $('dScA').textContent = D.sc[0]; $('dScB').textContent = D.sc[1];
+    $('dFb').innerHTML = '<span class="' + (s ? 'text-mag' : 'text-acc') + '">' +
+      esc(s ? duelCfg.b : duelCfg.a) + ' BENAR — +1 POIN</span>';
+    setTimeout(duelNext, 1400);
+  }else{
+    el.classList.add('wrong');
+    sfxNo();
+    duelLock(s);
+  }
+}
+
+function duelLock(s){
+  const sd = s ? 'B' : 'A';
+  D.lock[s] = 3;
+  $('side' + sd).classList.add('lock');
+  $('dLock' + sd).textContent = 'TERKUNCI 3s';
+  if(D.tid[s]) clearInterval(D.tid[s]);
+  D.tid[s] = setInterval(() => {
+    D.lock[s]--;
+    $('dLock' + sd).textContent = D.lock[s] > 0 ? 'TERKUNCI ' + D.lock[s] + 's' : '';
+    if(D.lock[s] <= 0){
+      clearInterval(D.tid[s]); D.tid[s] = null;
+      $('side' + sd).classList.remove('lock');
+      [...$('opts' + sd).children].forEach(o => o.classList.remove('wrong'));
+    }
+  }, 1000);
+
+  if(D.lock[0] > 0 && D.lock[1] > 0){          // dua-duanya salah — soal ditutup
+    D.open = false;
+    $('dFb').innerHTML = '<span class="text-bad">Dua-duanya salah · jawabannya <b>' +
+      (dir === 'b2d' ? D.q.value : showBin(D.q.bin)) + '</b></span>';
+    setTimeout(duelNext, 2400);
+  }
+}
+
+function duelOver(){
+  D.done = true;
+  D.tid.forEach(t => t && clearInterval(t));
+  Music.stop();
+  const win = D.sc[0] === D.sc[1] ? null : (D.sc[0] > D.sc[1] ? 0 : 1);
+  $('duel').classList.add('hidden');
+  $('result').classList.remove('hidden');
+  $('rTitle').textContent = 'DUEL SELESAI';
+  $('rScore').textContent = D.sc[0] + ' — ' + D.sc[1];
+  $('rSub').textContent = win === null ? 'Seri!' :
+    'Pemenang: ' + (win ? duelCfg.b : duelCfg.a);
+  $('rStats').innerHTML = [
+    [duelCfg.a, D.sc[0]], [duelCfg.b, D.sc[1]],
+    ['Soal dimainkan', D.qi], ['Tingkat', widthOf(duelCfg.lv) + '-bit']
+  ].map(s => '<div class="stat"><div class="l">' + esc(String(s[0])) + '</div><div class="v">' +
+    s[1] + '</div></div>').join('');
+  $('rNew').innerHTML = ''; $('rCode').innerHTML = '';
+  paintSwitch($('sw2'));
+  if(win !== null){ confetti(); sfxWin(); } else sfxOver();
+}
+
+$('dQuit').addEventListener('click', () => {
+  if(D){ D.done = true; D.tid.forEach(t => t && clearInterval(t)); }
+  Music.stop();
+  $('duel').classList.add('hidden'); $('home').classList.remove('hidden');
+});
+$('optsA').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if(b) duelAnswer(0, +b.dataset.i);
+});
+$('optsB').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if(b) duelAnswer(1, +b.dataset.i);
+});
+
+/* =========================================================================
+   KUIS KELAS (proyektor guru)
+   ========================================================================= */
+let K = null;
+
+function startKuis(){
+  mode = 'kuis';
+  K = {groups: kuisCfg.names.map(n => ({name:n, score:0})), qi:0, phase:'idle',
+       mark:{}, wager:[], wagerActive:false, pendingWager:false, q:null, t:0, tid:null};
+  qIndex = 0;
+  $('setup').classList.add('hidden'); $('result').classList.add('hidden');
+  $('kuis').classList.remove('hidden');
+  $('kBit').textContent = widthOf(kuisCfg.lv);
+  $('kTot').textContent = kuisCfg.total;
+  kuisIdle();
+}
+
+function kuisIdle(){
+  clearInterval(K.tid);
+  K.mark = {};
+  if(K.qi >= kuisCfg.total) return kuisOver();
+  const isWager = kuisCfg.taruhan && K.qi === kuisCfg.total - 1;
+  $('kCount').textContent = ''; $('kCount').classList.remove('low');
+  if(isWager){
+    K.phase = 'wager'; K.pendingWager = true;
+    K.wager = K.groups.map(g => Math.max(0, Math.min(g.score, Math.round(g.score / 2))));
+    $('kAsk').textContent = 'RONDE TARUHAN — ISI POIN TARUHAN, LALU SPASI';
+    $('kQ').textContent = '💰';
+    $('kHint').textContent = 'Benar = poin taruhan ditambahkan. Salah = dikurangi.';
+    sfxBoss();
+  }else{
+    K.phase = 'idle';
+    $('kAsk').textContent = 'TEKAN SPASI UNTUK MEMUNCULKAN SOAL';
+    $('kQ').textContent = '—';
+    $('kHint').textContent = '';
+  }
+  renderKBoard();
+}
+
+function kuisAsk(){
+  K.wagerActive = K.pendingWager; K.pendingWager = false;
+  K.qi++;
+  $('kQi').textContent = K.qi;
+  const w = widthOf(kuisCfg.lv), v = pickValue(w, qIndex++);
+  K.q = {value:v, width:w, bin:v.toString(2).padStart(w, '0')};
+  K.phase = 'live'; K.t = 15;
+  $('kAsk').textContent = (K.wagerActive ? '💰 TARUHAN · ' : '') +
+    (dir === 'b2d' ? 'BERAPA NILAI DESIMALNYA?' : 'TULIS DALAM BINER');
+  $('kQ').textContent = dir === 'b2d' ? showBin(K.q.bin) : v;
+  $('kHint').textContent = 'Tulis di kertas — angkat bersamaan saat waktu habis.';
+  $('kCount').textContent = K.t;
+  Music.start();
+  clearInterval(K.tid);
+  K.tid = setInterval(() => {
+    K.t--;
+    $('kCount').textContent = Math.max(0, K.t);
+    $('kCount').classList.toggle('low', K.t <= 5);
+    Music.setMood(K.t <= 5 ? 'panik' : 'riang');
+    if(K.t <= 5 && K.t > 0) sfxTick();
+    if(K.t <= 0){ clearInterval(K.tid); kuisReveal(); }
+  }, 1000);
+  renderKBoard();
+}
+
+function kuisReveal(){
+  clearInterval(K.tid);
+  Music.stop();
+  K.phase = 'reveal';
+  $('kCount').textContent = ''; $('kCount').classList.remove('low');
+  $('kAsk').textContent = 'JAWABAN';
+  $('kQ').textContent = dir === 'b2d' ? K.q.value : showBin(K.q.bin);
+  $('kHint').innerHTML = 'Tekan <b>1–' + Math.min(9, K.groups.length) +
+    '</b> atau ketuk kelompoknya untuk menandai yang benar, lalu Spasi.';
+  sfxLevel();
+  renderKBoard();
+}
+
+function kuisApply(){
+  K.groups.forEach((g, i) => {
+    const ok = !!K.mark[i];
+    if(K.wagerActive) g.score += ok ? (K.wager[i] || 0) : -(K.wager[i] || 0);
+    else if(ok) g.score += 100;
+  });
+  if(K.wagerActive){ confetti(); sfxWin(); }
+  K.wagerActive = false;
+  kuisIdle();
+}
+
+function kuisAdvance(){
+  if(!K) return;
+  if(K.phase === 'idle')        kuisAsk();
+  else if(K.phase === 'wager'){ readWagers(); kuisAsk(); }
+  else if(K.phase === 'live')   kuisReveal();
+  else if(K.phase === 'reveal') kuisApply();
+}
+function readWagers(){
+  [...$('kBoard').querySelectorAll('input[data-w]')].forEach(inp => {
+    const i = +inp.dataset.w;
+    K.wager[i] = Math.max(0, Math.min(Math.max(0, K.groups[i].score), +inp.value || 0));
+  });
+}
+function renderKBoard(){
+  $('kBoard').innerHTML = K.groups.map((g, i) =>
+    '<div class="grp' + (K.mark[i] ? ' mark' : '') + '" data-i="' + i + '">' +
+    '<span class="idx">' + (i + 1) + '</span><span class="n">' + esc(g.name) + '</span>' +
+    (K.phase === 'wager'
+      ? '<input type="number" min="0" max="' + Math.max(0, g.score) + '" value="' + (K.wager[i] || 0) + '" data-w="' + i + '">'
+      : '') +
+    '<span class="s">' + g.score + '</span></div>').join('');
+}
+function kuisMark(i){
+  if(!K || K.phase !== 'reveal' || i >= K.groups.length) return;
+  K.mark[i] = !K.mark[i];
+  tone(K.mark[i] ? 880 : 440, .05, 'square', .05);
+  renderKBoard();
+}
+function kuisOver(){
+  clearInterval(K.tid); Music.stop();
+  const rank = K.groups.map((g, i) => ({...g, i})).sort((a, b) => b.score - a.score);
+  $('kuis').classList.add('hidden');
+  $('result').classList.remove('hidden');
+  $('rTitle').textContent = 'KUIS KELAS SELESAI';
+  $('rScore').textContent = rank[0].score;
+  $('rSub').textContent = 'Juara: ' + rank[0].name;
+  $('rStats').innerHTML = rank.map((g, i) =>
+    '<div class="stat"><div class="l">' + (i + 1) + '. ' + esc(g.name) + '</div><div class="v">' +
+    g.score + '</div></div>').join('');
+  $('rNew').innerHTML = ''; $('rCode').innerHTML = '';
+  paintSwitch($('sw2'));
+  confetti(); sfxWin();
+}
+
+$('kNext').addEventListener('click', kuisAdvance);
+$('kBoard').addEventListener('click', e => {
+  const g = e.target.closest('.grp');
+  if(g && e.target.tagName !== 'INPUT') kuisMark(+g.dataset.i);
+});
+$('kQuit').addEventListener('click', () => {
+  if(K) clearInterval(K.tid);
+  Music.stop();
+  $('kuis').classList.add('hidden'); $('home').classList.remove('hidden');
+});
+
+/* papan ketik khusus duel & kuis */
+document.addEventListener('keydown', e => {
+  if(!$('duel').classList.contains('hidden')){
+    const a = KEYS_A.indexOf(e.key.toUpperCase());
+    if(a >= 0){ e.preventDefault(); return duelAnswer(0, a); }
+    const b = ['ArrowUp','ArrowRight','ArrowLeft','ArrowDown'].indexOf(e.key);
+    if(b >= 0){ e.preventDefault(); return duelAnswer(1, b); }
+    return;
+  }
+  if(!$('kuis').classList.contains('hidden')){
+    if(e.target.tagName === 'INPUT' && e.key !== ' ') return;
+    if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); return kuisAdvance(); }
+    if(/^[1-9]$/.test(e.key)){ e.preventDefault(); return kuisMark(+e.key - 1); }
+  }
+});
+
+/* =========================================================================
+   PAPAN KELAS (guru)
+   ========================================================================= */
+function renderGTable(){
+  const rows = (save.kelas || []).slice().sort((a, b) => b.score - a.score);
+  $('gTable').innerHTML =
+    '<thead><tr><th>#</th><th>Nama</th><th>Skor</th><th>Level</th><th>Akurasi</th><th>Mode</th></tr></thead><tbody>' +
+    (rows.length
+      ? rows.map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(r.nama) + '</td><td>' + r.score +
+          '</td><td>' + widthOf(r.lv) + '-bit</td><td>' + r.acc + '%</td><td>' +
+          (MD_LABEL[r.md] || '—') + '</td></tr>').join('')
+      : '<tr><td colspan="6" class="text-dimmer">Belum ada data.</td></tr>') +
+    '</tbody>';
+}
+const gMsg = (t, ok) => {
+  $('gMsg').textContent = t;
+  $('gMsg').style.color = ok ? 'var(--color-acc)' : 'var(--color-bad)';
+};
+$('bGuru').addEventListener('click', () => {
+  $('home').classList.add('hidden'); $('guru').classList.remove('hidden'); renderGTable();
+});
+$('bDaring').addEventListener('click', () => { location.href = 'daring.html'; });
+$('gBack').addEventListener('click', () => {
+  $('guru').classList.add('hidden'); $('home').classList.remove('hidden');
+});
+$('gAdd').addEventListener('click', () => {
+  const nama = $('gNama').value.trim();
+  const r = decodeResult($('gKode').value);
+  if(!nama) return gMsg('Nama belum diisi.');
+  if(!r)    return gMsg('Kode tidak sah — periksa lagi ketikannya.');
+  save.kelas = save.kelas || [];
+  save.kelas.push({nama, score:r.score, lv:r.lv, acc:r.acc, md:r.md});
+  persist(); renderGTable();
+  $('gNama').value = ''; $('gKode').value = ''; $('gNama').focus();
+  gMsg('Tersimpan: ' + nama + ' · ' + r.score + ' poin.', true);
+  tone(880, .08, 'square', .06);
+});
+$('gCopy').addEventListener('click', () => {
+  const rows = (save.kelas || []).slice().sort((a, b) => b.score - a.score);
+  if(!rows.length) return gMsg('Tabel masih kosong.');
+  const tsv = 'Peringkat\tNama\tSkor\tLevel\tAkurasi\tMode\n' + rows.map((r, i) =>
+    [i + 1, r.nama, r.score, widthOf(r.lv) + '-bit', r.acc + '%', MD_LABEL[r.md] || '—'].join('\t')).join('\n');
+  navigator.clipboard.writeText(tsv)
+    .then(() => gMsg('Tabel disalin — tinggal tempel ke Excel atau Google Sheets.', true))
+    .catch(() => gMsg('Penyalinan ditolak browser. Coba lewat https atau salin manual.'));
+});
+$('gClear').addEventListener('click', () => {
+  if(!confirm('Kosongkan seluruh Papan Kelas? Tindakan ini tidak bisa dibatalkan.')) return;
+  save.kelas = []; persist(); renderGTable(); gMsg('Papan kelas dikosongkan.', true);
+});
+
+/* kode sesi */
+$('sesi').addEventListener('input', () => {
+  sessionCode = $('sesi').value.trim().toUpperCase();
+  save.sesi = sessionCode; persist();
+});
+
+/* init */
+$('bSound').setAttribute('aria-pressed', save.sound);
+$('bSound').textContent = save.sound ? '♪' : '✕';
+$('bMusic').setAttribute('aria-pressed', save.music);
+$('bMusic').textContent = save.music ? '♫' : '♫̸';
+paintSwitch($('sw')); paintSwitch($('sw2'));
+paintLabelBtn();
+applyZoom();
+$('sesi').value = sessionCode;
+renderHome();
+</script>
+</body>
+</html>
+
+
+
