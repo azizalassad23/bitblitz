@@ -295,6 +295,15 @@ async function kirim(data, diamSaatGagal){
     return j;
   }catch(e){
     if(!diamSaatGagal) tandaKoneksi(false);
+    /* Kalau Web App tidak disetel "Anyone", Google membalas halaman "Akses Ditolak"
+       tanpa header CORS. Browser hanya melempar TypeError "Failed to fetch" yang tidak
+       menjelaskan apa pun, jadi penyebab tersering disebutkan langsung di sini. */
+    if(e.name === 'AbortError')
+      throw new Error('Server tidak menjawab dalam 12 detik. Periksa sinyal, lalu coba lagi.');
+    if(e instanceof TypeError)
+      throw new Error('Permintaan ditolak sebelum sampai ke skrip. Penyebab tersering: di Apps Script, ' +
+        'Deploy → Manage deployments → ikon pensil → "Who has access" belum disetel ' +
+        '"Anyone". Periksa juga URL-nya sudah benar dan diakhiri /exec.');
     throw e;
   }finally{ clearTimeout(jam); }
 }
