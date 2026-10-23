@@ -731,48 +731,102 @@
    ========================================================================= */
 .hidden { display: none !important; }
 
+
 /* =========================================================================
-   HALAMAN REMEDIAL — papan 30 kartu soal
+   HALAMAN REMEDIAL — papan kartu soal
    Punggung kartu WAJIB seragam: tidak boleh ada petunjuk tingkat kesulitan
    maupun arah konversi sebelum kartu dipilih.
    ========================================================================= */
 @layer components {
   .papan {
-    @apply grid gap-[.55rem];
-    grid-template-columns: repeat(auto-fill, minmax(4.6rem, 1fr));
+    @apply grid gap-[.6rem] rounded-[var(--radius-panel)] p-[.7rem];
+    grid-template-columns: repeat(auto-fill, minmax(4.8rem, 1fr));
+    background:
+      radial-gradient(90% 60% at 50% 0%, rgba(62,242,192,.06), transparent 70%),
+      rgba(4,10,22,.5);
+    border: 1px solid var(--color-line);
+    box-shadow: inset 0 2px 18px rgba(0,0,0,.55);
   }
+
   .kartu {
-    @apply relative flex aspect-[3/4] cursor-pointer flex-col items-center justify-center
-           overflow-hidden rounded-[14px] border-2 border-line transition-all duration-200;
-    background: linear-gradient(160deg, rgba(27,63,122,.55), rgba(10,18,34,.95));
-    box-shadow: 0 6px 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    @apply relative flex aspect-[3/4] cursor-pointer items-center justify-center
+           overflow-hidden rounded-[15px] transition-all duration-200;
+    border: 2px solid rgba(96,136,205,.4);
+    background:
+      radial-gradient(115% 80% at 50% -12%, rgba(62,242,192,.16), transparent 58%),
+      linear-gradient(158deg, #1c3a6e 0%, #0e1e38 46%, #070e1c 100%);
+    box-shadow: 0 7px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.09);
     font-family: var(--font-mono);
   }
-  .kartu::before {                      /* motif biner samar, sama di semua kartu */
-    content: "01001011";
+  /* motif biner bertumpuk — sama persis di setiap kartu */
+  .kartu .pola {
     @apply pointer-events-none absolute inset-0 flex items-center justify-center
-           text-[2.6rem] font-bold opacity-[.05];
+           text-center text-[.78rem] font-bold leading-[1.25] opacity-[.07];
     color: var(--color-acc);
-    letter-spacing: -.05em;
-    transform: rotate(-24deg) scale(1.5);
+    white-space: pre;
+    letter-spacing: .12em;
+    transform: rotate(-20deg) scale(1.35);
   }
-  .kartu .no {
-    @apply relative text-[1.5rem] font-black leading-none text-fg;
-    text-shadow: 0 0 18px rgba(79,168,255,.45);
+  /* bingkai dalam, memberi kesan kartu betulan */
+  .kartu .bingkai {
+    @apply pointer-events-none absolute rounded-[9px];
+    inset: 6px;
+    border: 1px solid rgba(62,242,192,.22);
+    box-shadow: inset 0 0 14px rgba(62,242,192,.07);
   }
-  .kartu .tanda { @apply relative mt-1 text-[1.15rem] leading-none; }
-  .kartu:hover:not(.habis) {
-    @apply -translate-y-1 border-acc;
-    box-shadow: 0 10px 0 rgba(0,0,0,.45), 0 0 30px rgba(62,242,192,.3);
+  /* kilau yang menyapu saat kartu disentuh */
+  .kartu .kilau {
+    @apply pointer-events-none absolute inset-0;
+    background: linear-gradient(115deg, transparent 34%, rgba(255,255,255,.16) 47%, transparent 60%);
+    transform: translateX(-130%);
+    transition: transform .6s ease;
   }
-  .kartu:active:not(.habis) { @apply translate-y-0; box-shadow: 0 2px 0 rgba(0,0,0,.45); }
+  .kartu:hover:not(.habis) .kilau { transform: translateX(130%); }
 
-  .kartu.habis { @apply cursor-not-allowed; filter: grayscale(.45); }
-  .kartu.habis::before { @apply opacity-[.03]; }
-  .kartu.habis .no { @apply text-dimmer; text-shadow: none; }
-  .kartu.benar { @apply border-acc; background: linear-gradient(160deg, rgba(62,242,192,.2), rgba(8,30,26,.95)); }
-  .kartu.salah { @apply border-bad; background: linear-gradient(160deg, rgba(255,77,109,.2), rgba(34,8,14,.95)); }
-  .kartu.lewat { @apply border-hot; background: linear-gradient(160deg, rgba(255,138,61,.18), rgba(34,20,8,.95)); }
+  .kartu .no {
+    @apply relative text-[1.65rem] font-black leading-none text-fg;
+    text-shadow: 0 2px 10px rgba(0,0,0,.6), 0 0 22px rgba(79,168,255,.5);
+  }
+  .kartu .sudut {
+    @apply pointer-events-none absolute text-[.52rem] font-bold tracking-[.18em] opacity-40;
+    color: var(--color-acc);
+  }
+  .kartu .sudut.kiri  { top: .4rem; left: .45rem; }
+  .kartu .sudut.kanan { bottom: .4rem; right: .45rem; transform: rotate(180deg); }
+
+  .kartu:hover:not(.habis) {
+    @apply -translate-y-1.5;
+    border-color: var(--color-acc);
+    box-shadow: 0 12px 0 rgba(0,0,0,.5), 0 0 34px rgba(62,242,192,.34);
+  }
+  .kartu:active:not(.habis) { @apply translate-y-0; box-shadow: 0 2px 0 rgba(0,0,0,.5); }
+  .kartu.baru { animation: kartuMasuk .4s cubic-bezier(.2,.9,.3,1.3) backwards; }
+
+  /* kartu yang sudah dipakai */
+  .kartu.habis { @apply cursor-not-allowed; filter: saturate(.5); }
+  .kartu.habis .kilau { @apply hidden; }
+  .kartu.habis .pola  { @apply opacity-[.04]; }
+  .kartu.habis .no    { @apply text-[1.05rem] text-dimmer; text-shadow: none; }
+  .kartu .tanda {
+    @apply pointer-events-none absolute inset-x-0 bottom-[18%] text-center text-[1.5rem] leading-none;
+  }
+  .kartu.benar {
+    border-color: var(--color-acc);
+    background: linear-gradient(158deg, rgba(62,242,192,.26), rgba(7,24,21,.97));
+  }
+  .kartu.benar .tanda { color: var(--color-acc); text-shadow: 0 0 18px rgba(62,242,192,.7); }
+  .kartu.salah {
+    border-color: var(--color-bad);
+    background: linear-gradient(158deg, rgba(255,77,109,.24), rgba(28,7,12,.97));
+  }
+  .kartu.salah .tanda { color: var(--color-bad); text-shadow: 0 0 18px rgba(255,77,109,.7); }
+  .kartu.lewat {
+    border-color: var(--color-hot);
+    background: linear-gradient(158deg, rgba(255,138,61,.22), rgba(28,16,6,.97));
+  }
+  .kartu.lewat .tanda { color: var(--color-hot); text-shadow: 0 0 18px rgba(255,138,61,.7); }
+
+  .papan.acak .kartu:not(.habis) { animation: kocok .5s cubic-bezier(.2,.9,.3,1.25); }
 
   /* hamparan soal */
   #soal {
@@ -780,7 +834,7 @@
     background: rgba(4,6,15,.93);
   }
   #soal.on { @apply flex; }
-  #soal .kotak { @apply w-full max-w-[42rem]; }
+  #soal .kotak { @apply w-full max-w-[42rem]; animation: kartuBuka .34s cubic-bezier(.2,.9,.3,1.25); }
 
   .tingkat {
     @apply inline-block rounded-full border px-[.9rem] py-[.25rem]
@@ -801,8 +855,17 @@
     @apply border-acc;
     box-shadow: 0 0 0 4px rgba(62,242,192,.14), 0 0 30px rgba(62,242,192,.25);
   }
-  .vonis { @apply mt-4 min-h-[3.5em] text-[1.05rem] leading-relaxed; font-family: var(--font-mono); }
+  .vonis { @apply mt-4 min-h-[2.6em] text-[1.15rem] leading-relaxed; font-family: var(--font-mono); }
   .vonis.ok { @apply text-acc; }
   .vonis.no { @apply text-bad; }
-  .vonis .urai { @apply mt-2 block text-[.85rem] text-dim; }
+  .vonis .sub { @apply mt-1 block text-[.82rem] text-dim; }
+}
+
+@keyframes kartuMasuk { from { opacity: 0; transform: translateY(10px) scale(.9) } to { opacity: 1; transform: none } }
+@keyframes kartuBuka  { from { opacity: 0; transform: scale(.88) rotateX(10deg) } to { opacity: 1; transform: none } }
+@keyframes kocok {
+  0%   { transform: translateY(0) rotate(0) }
+  35%  { transform: translateY(-10px) rotate(-5deg) }
+  70%  { transform: translateY(4px) rotate(3deg) }
+  100% { transform: translateY(0) rotate(0) }
 }

@@ -187,25 +187,32 @@ Untuk murid yang perlu mengulang. Buka `remedial.html`, tulis nama, lalu pilih k
 
 - **30 kartu tertutup** dengan punggung yang sama persis — tidak ada petunjuk apa pun
   tentang isinya sebelum dipilih.
-- **15 kartu mudah** (bilangan ratusan, 100–999) dengan waktu **150 detik**, dan
-  **15 kartu susah** (bilangan ribuan, 1.000–9.999) dengan waktu **240 detik**.
+- **20 kartu mudah** (bilangan ratusan, 100–999) dengan waktu **150 detik**, dan
+  **10 kartu susah** (bilangan ribuan, 1.000–9.999) dengan waktu **240 detik**.
 - Arah soalnya diacak per kartu: bisa biner → desimal, bisa desimal → biner.
 - Jawaban diketik di kotak teks. Nol di depan dan spasi dimaafkan, jadi
   `0010 1101` tetap dinilai sama dengan `101101`.
-- Begitu dijawab, terdengar **suara** yang menyebut benar atau salah, lalu kunci
-  jawaban beserta uraian nilai tempatnya ditampilkan sebagai bahan belajar.
+- Begitu dijawab, terdengar **suara** yang menyebut benar atau salah.
+  **Kunci jawaban tidak pernah ditampilkan ke murid.**
 - **Kartu yang sudah dibuka tidak bisa dipilih lagi** — termasuk kalau halaman
   dimuat ulang. Waktunya pun terus berjalan menembus muat ulang, jadi menyegarkan
   halaman tidak bisa dipakai menghindari soal yang sulit.
+- Tombol **ACAK LETAK KARTU** mengocok ulang posisi kartu yang belum terbuka.
+  Kartu yang sudah dikerjakan dibiarkan di tempatnya supaya nomor di rekap tidak
+  berubah. Tombol ini menolak bekerja selama masih ada kartu yang terbuka.
 - Tombol **MULAI ULANG** membuat 30 kartu baru dan menghapus semua jawaban.
 
 Penilaian dilakukan guru secara manual. Di bagian bawah halaman ada tabel rekap
-(kartu, tingkat, soal, jawaban murid, kunci, hasil, detik) dengan tombol
-**SALIN REKAP** untuk ditempel ke Excel atau Google Sheets.
+(kartu, tingkat, soal, jawaban murid, hasil, detik) dengan tombol **SALIN REKAP**
+untuk ditempel ke Excel atau Google Sheets. Tabel di layar sengaja **tidak memuat
+kolom kunci** supaya murid tidak melihat jawabannya; kuncinya tetap ikut terbawa
+saat rekap disalin, jadi guru tetap mendapatkannya di spreadsheet.
 
-Suaranya memakai pembaca teks bawaan perangkat. Kalau HP murid tidak punya suara
-bahasa Indonesia, penanda benar/salah tetap terdengar sebagai nada — jadi tidak
-pernah hilang sama sekali.
+Suaranya memakai pembaca teks bawaan perangkat, dengan tempo sedikit diperlambat
+dan nada dibiarkan alami supaya terdengar wajar. Halaman memilih sendiri suara
+bahasa Indonesia yang paling halus bila perangkat punya lebih dari satu. Kalau HP
+murid tidak punya suara bahasa Indonesia sama sekali, penanda benar/salah tetap
+terdengar sebagai nada lonceng — jadi tidak pernah hilang.
 
 ---
 
