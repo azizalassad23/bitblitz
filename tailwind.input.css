@@ -8,6 +8,7 @@
 @import "tailwindcss";
 @source "./index.html";
 @source "./daring.html";
+@source "./remedial.html";
 
 /* ---------- palet & token ---------- */
 @theme {
@@ -729,3 +730,79 @@
    `html.zoom2 #game { display:flex }` akan memunculkan layar yang disembunyikan.
    ========================================================================= */
 .hidden { display: none !important; }
+
+/* =========================================================================
+   HALAMAN REMEDIAL — papan 30 kartu soal
+   Punggung kartu WAJIB seragam: tidak boleh ada petunjuk tingkat kesulitan
+   maupun arah konversi sebelum kartu dipilih.
+   ========================================================================= */
+@layer components {
+  .papan {
+    @apply grid gap-[.55rem];
+    grid-template-columns: repeat(auto-fill, minmax(4.6rem, 1fr));
+  }
+  .kartu {
+    @apply relative flex aspect-[3/4] cursor-pointer flex-col items-center justify-center
+           overflow-hidden rounded-[14px] border-2 border-line transition-all duration-200;
+    background: linear-gradient(160deg, rgba(27,63,122,.55), rgba(10,18,34,.95));
+    box-shadow: 0 6px 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    font-family: var(--font-mono);
+  }
+  .kartu::before {                      /* motif biner samar, sama di semua kartu */
+    content: "01001011";
+    @apply pointer-events-none absolute inset-0 flex items-center justify-center
+           text-[2.6rem] font-bold opacity-[.05];
+    color: var(--color-acc);
+    letter-spacing: -.05em;
+    transform: rotate(-24deg) scale(1.5);
+  }
+  .kartu .no {
+    @apply relative text-[1.5rem] font-black leading-none text-fg;
+    text-shadow: 0 0 18px rgba(79,168,255,.45);
+  }
+  .kartu .tanda { @apply relative mt-1 text-[1.15rem] leading-none; }
+  .kartu:hover:not(.habis) {
+    @apply -translate-y-1 border-acc;
+    box-shadow: 0 10px 0 rgba(0,0,0,.45), 0 0 30px rgba(62,242,192,.3);
+  }
+  .kartu:active:not(.habis) { @apply translate-y-0; box-shadow: 0 2px 0 rgba(0,0,0,.45); }
+
+  .kartu.habis { @apply cursor-not-allowed; filter: grayscale(.45); }
+  .kartu.habis::before { @apply opacity-[.03]; }
+  .kartu.habis .no { @apply text-dimmer; text-shadow: none; }
+  .kartu.benar { @apply border-acc; background: linear-gradient(160deg, rgba(62,242,192,.2), rgba(8,30,26,.95)); }
+  .kartu.salah { @apply border-bad; background: linear-gradient(160deg, rgba(255,77,109,.2), rgba(34,8,14,.95)); }
+  .kartu.lewat { @apply border-hot; background: linear-gradient(160deg, rgba(255,138,61,.18), rgba(34,20,8,.95)); }
+
+  /* hamparan soal */
+  #soal {
+    @apply fixed inset-0 z-[26] hidden items-center justify-center p-4 backdrop-blur-lg;
+    background: rgba(4,6,15,.93);
+  }
+  #soal.on { @apply flex; }
+  #soal .kotak { @apply w-full max-w-[42rem]; }
+
+  .tingkat {
+    @apply inline-block rounded-full border px-[.9rem] py-[.25rem]
+           text-[.7rem] font-extrabold uppercase tracking-[.2em];
+    font-family: var(--font-mono);
+  }
+  .tingkat.mudah { @apply border-acc text-acc; background: rgba(62,242,192,.1); }
+  .tingkat.susah { @apply border-mag text-mag; background: rgba(255,63,164,.1); }
+
+  input.jawab {
+    @apply w-full rounded-[13px] border-2 border-line px-4 py-3 text-center
+           text-[1.8rem] font-extrabold text-fg outline-none transition-all duration-200;
+    background: rgba(4,8,18,.9);
+    font-family: var(--font-mono);
+    letter-spacing: .08em;
+  }
+  input.jawab:focus {
+    @apply border-acc;
+    box-shadow: 0 0 0 4px rgba(62,242,192,.14), 0 0 30px rgba(62,242,192,.25);
+  }
+  .vonis { @apply mt-4 min-h-[3.5em] text-[1.05rem] leading-relaxed; font-family: var(--font-mono); }
+  .vonis.ok { @apply text-acc; }
+  .vonis.no { @apply text-bad; }
+  .vonis .urai { @apply mt-2 block text-[.85rem] text-dim; }
+}

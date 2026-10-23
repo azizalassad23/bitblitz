@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BIT BLITZ REMEDIAL — 30 Kartu Soal</title>
+<meta name="description" content="Remedial konversi biner: 30 kartu soal acak, mudah dan susah, dengan suara penanda benar atau salah.">
+<link rel="stylesheet" href="tailwind.css">
+</head>
+<body>
+<div id="aurora"></div>
+<canvas id="fx"></canvas>
+<div id="scan"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo"><b>BIT</b> <i>BLITZ</i><span>REMEDIAL · 30 KARTU SOAL</span></div>
+  <div class="spacer"></div>
+  <button class="icobtn" id="bSuara" aria-pressed="true" title="Suara">🔊</button>
+  <button class="icobtn" id="bProj" aria-pressed="false" title="Perbesaran: Normal → Besar → TV">⛶ NORMAL</button>
+</header>
+
+<!-- ================== PENGANTAR ================== -->
+<div class="card">
+  <h2>Remedial konversi biner</h2>
+  <div class="field">
+    <label>Nama murid</label>
+    <input id="nama" placeholder="Tulis nama lengkapmu" autocomplete="off">
+  </div>
+  <p class="text-[.82rem] leading-relaxed text-dim">
+    Ada <b class="text-gold">30 kartu</b> tertutup di bawah. Punggung kartunya sama
+    semua — kamu tidak tahu isinya sebelum memilih. Sebagian soal
+    <b class="text-acc">mudah</b> (angka ratusan, waktu 150 detik), sebagian
+    <b class="text-mag">susah</b> (angka ribuan, waktu 240 detik). Arah soalnya juga acak:
+    bisa biner ke desimal, bisa sebaliknya.
+  </p>
+  <p class="mt-2 text-[.82rem] leading-relaxed text-dim">
+    Waktu mulai berjalan begitu kartu dibuka, dan
+    <b class="text-bad">kartu yang sudah dibuka tidak bisa dipilih lagi</b> —
+    termasuk kalau halaman ini dimuat ulang.
+  </p>
+  <div class="row">
+    <button class="btn" id="bUlang">MULAI ULANG (KARTU BARU)</button>
+  </div>
+</div>
+
+<!-- ================== PAPAN SKOR RINGKAS ================== -->
+<div class="hud mt-4">
+  <span class="chip">TERBUKA <b id="hBuka">0</b>/30</span>
+  <span class="chip sc">BENAR <b id="hBenar">0</b></span>
+  <span class="chip">SALAH <b id="hSalah">0</b></span>
+  <span class="chip">HABIS WAKTU <b id="hLewat">0</b></span>
+</div>
+
+<!-- ================== PAPAN KARTU ================== -->
+<div class="card">
+  <h2>Pilih satu kartu</h2>
+  <div class="papan" id="papan"></div>
+</div>
+
+<!-- ================== REKAP ================== -->
+<div class="card" id="kartuRekap">
+  <h2>Rekap untuk guru</h2>
+  <div class="mt-2 overflow-x-auto">
+    <table class="board" id="rekap"></table>
+  </div>
+  <div class="row">
+    <button class="btn" id="bSalin">SALIN REKAP</button>
+  </div>
+  <div class="lockmsg" id="pesanSalin"></div>
+</div>
+
+<p class="foot">
+  Penilaian dilakukan guru secara manual. Halaman ini hanya mencatat jawaban,
+  hasil, dan waktu pengerjaan tiap kartu.
+</p>
+
+</div>
+
+<!-- ================== HAMPARAN SOAL ================== -->
+<div id="soal">
+  <div class="kotak">
+    <div class="card">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="chip">KARTU <b id="sNo">—</b></span>
+        <span class="tingkat mudah" id="sTingkat">MUDAH</span>
+        <span class="spacer"></span>
+        <span class="chip sc">SISA <b id="sDetik">—</b></span>
+      </div>
+
+      <div class="tbar mt-3" id="sBar"><i id="sFill"></i></div>
+
+      <div class="stage">
+        <div class="ask" id="sAsk">UBAH KE DESIMAL</div>
+        <div class="q" id="sQ">—</div>
+      </div>
+
+      <div class="mt-4">
+        <label class="mb-2 block text-[.68rem] font-bold uppercase tracking-[.18em] text-dim"
+               for="sInput">Tulis jawabanmu</label>
+        <input class="jawab" id="sInput" inputmode="numeric" autocomplete="off"
+               autocorrect="off" spellcheck="false" placeholder="?">
+      </div>
+
+      <div class="vonis" id="sVonis"></div>
+
+      <div class="row">
+        <button class="btn go" id="bKirim">KIRIM JAWABAN</button>
+        <button class="btn hidden" id="bTutup">TUTUP KARTU</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   BIT BLITZ REMEDIAL
+   30 kartu tertutup. 15 mudah (ratusan, 150 detik) + 15 susah (ribuan, 240 detik).
+   Arah konversi diacak per kartu. Penilaian akhir dilakukan guru.
+   ========================================================================= */
+
+const JUM   = { mudah: 15, susah: 15 };
+const DETIK = { mudah: 150, susah: 240 };
+const LS    = 'bitblitz.remedial';
+
+const $  = id => document.getElementById(id);
+const ri = n => Math.floor(Math.random() * n);
+const lolos = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* =========================================================================
+   LATAR
+   ========================================================================= */
+const cv = $('fx'), ctx = cv.getContext('2d');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W = 0, H = 0, hujan = [];
+function ukurKanvas(){
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  hujan = Array.from({length: Math.round(W / 44)}, () => ({
+    x: Math.random() * W, y: Math.random() * H, sp: .25 + Math.random() * .7,
+    c: '01'[ri(2)], a: .04 + Math.random() * .11, s: 10 + ri(8)
+  }));
+}
+addEventListener('resize', () => {
+  ukurKanvas();
+  if(simpanan.dibuka) pasFont($('sQ'), $('sQ').textContent);
+});
+function bingkai(){
+  ctx.clearRect(0, 0, W, H);
+  if(!REDUCED) for(const d of hujan){
+    ctx.fillStyle = 'rgba(62,242,192,' + d.a + ')';
+    ctx.font = '600 ' + d.s + 'px ui-monospace,monospace';
+    ctx.fillText(d.c, d.x, d.y);
+    d.y += d.sp;
+    if(d.y > H + 14){ d.y = -14; d.x = Math.random() * W; }
+  }
+  requestAnimationFrame(bingkai);
+}
+ukurKanvas(); bingkai();
+
+/* =========================================================================
+   BUNYI & SUARA
+   Dua lapis: nada sintetis (selalu ada) + suara bicara lewat Web Speech API
+   (kalau perangkatnya punya). Jadi penanda benar/salah tetap terdengar
+   walau suara bicara tidak tersedia.
+   ========================================================================= */
+let actx = null;
+function nada(f, dur, tipe, vol, tunda){
+  if(!simpanan.suara) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime + (tunda || 0);
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = tipe || 'square';
+    o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(vol || .06, t + .012);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + .03);
+  }catch(e){}
+}
+
+let suaraID = null;
+function pilihSuara(){
+  try{
+    const v = speechSynthesis.getVoices() || [];
+    suaraID = v.find(x => /^id([-_]|$)/i.test(x.lang))
+           || v.find(x => /indonesia/i.test(x.name))
+           || v.find(x => /^ms([-_]|$)/i.test(x.lang))   // Melayu paling dekat bunyinya
+           || null;
+  }catch(e){ suaraID = null; }
+}
+if('speechSynthesis' in window){
+  pilihSuara();
+  speechSynthesis.addEventListener('voiceschanged', pilihSuara);
+}
+function ucap(teks, laju, nadaSuara){
+  if(!simpanan.suara) return;
+  try{
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(teks);
+    u.lang = 'id-ID';
+    if(suaraID) u.voice = suaraID;
+    u.rate  = laju || 1;
+    u.pitch = nadaSuara || 1;
+    u.volume = 1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+const KATA_BENAR = ['Benar!', 'Tepat sekali!', 'Bagus, betul!', 'Mantap, jawabanmu benar!'];
+const KATA_SALAH = ['Belum tepat.', 'Sayang sekali, salah.', 'Kurang tepat.', 'Jawabanmu salah.'];
+
+function suaraBenar(){
+  nada(660, .1, 'square', .06);
+  nada(880, .1, 'square', .06, .08);
+  nada(1320, .22, 'square', .06, .16);
+  ucap(KATA_BENAR[ri(KATA_BENAR.length)], 1, 1.15);
+}
+function suaraSalah(){
+  nada(220, .14, 'sawtooth', .07);
+  nada(150, .3, 'sawtooth', .06, .12);
+  ucap(KATA_SALAH[ri(KATA_SALAH.length)], .95, .85);
+}
+function suaraHabis(){
+  nada(400, .14, 'square', .06);
+  nada(300, .14, 'square', .06, .14);
+  nada(200, .32, 'square', .06, .28);
+  ucap('Waktu habis.', .95, .9);
+}
+const bunyiDetik = () => nada(1500, .04, 'sine', .045);
+const bunyiBuka  = () => { nada(520, .07, 'square', .05); nada(780, .12, 'square', .05, .06); };
+
+/* =========================================================================
+   KEADAAN
+   ========================================================================= */
+let simpanan = Object.assign(
+  { zoom: 0, suara: true, nama: '', kartu: null, dibuka: null },
+  JSON.parse(localStorage.getItem(LS) || '{}')
+);
+const tulis = () => localStorage.setItem(LS, JSON.stringify(simpanan));
+
+function kartuBaru(tingkat, dipakai){
+  let nilai, n = 0;
+  do {
+    nilai = tingkat === 'mudah' ? 100 + ri(900) : 1000 + ri(9000);
+    n++;
+  } while(dipakai.has(nilai) && n < 60);
+  dipakai.add(nilai);
+  return {
+    tingkat: tingkat,
+    nilai: nilai,
+    tipe: ri(2) ? 'b2d' : 'd2b',      // b2d = biner ditampilkan, jawab desimal
+    status: 'baru',                   // baru | benar | salah | lewat
+    jawaban: '',
+    detik: 0
+  };
+}
+
+function susunKartu(){
+  const dipakai = new Set(), daftar = [];
+  for(let i = 0; i < JUM.mudah; i++) daftar.push(kartuBaru('mudah', dipakai));
+  for(let i = 0; i < JUM.susah; i++) daftar.push(kartuBaru('susah', dipakai));
+  for(let i = daftar.length - 1; i > 0; i--){      // acak urutannya
+    const j = ri(i + 1);
+    const t = daftar[i]; daftar[i] = daftar[j]; daftar[j] = t;
+  }
+  return daftar;
+}
+
+if(!Array.isArray(simpanan.kartu) || simpanan.kartu.length !== JUM.mudah + JUM.susah){
+  simpanan.kartu = susunKartu();
+  simpanan.dibuka = null;
+  tulis();
+}
+
+/* =========================================================================
+   SOAL
+   ========================================================================= */
+const biner = v => v.toString(2);
+function urai(nilai){
+  const b = biner(nilai), bagian = [];
+  for(let i = 0; i < b.length; i++){
+    if(b[i] === '1') bagian.push(Math.pow(2, b.length - 1 - i));
+  }
+  return nilai + ' = ' + bagian.join(' + ');
+}
+const jawabanBenar = k => k.tipe === 'b2d' ? String(k.nilai) : biner(k.nilai);
+
+/* Biner 14 digit bisa pecah dua baris dan jadi sulit dibaca saat dikejar waktu.
+   Ukuran soal dikecilkan secukupnya agar selalu muat satu baris. */
+function pasFont(el, teks){
+  /* Saat hamparan masih tersembunyi, lebarnya terbaca nol dan ukurannya jadi salah.
+     Jangan ubah apa pun sampai tata letaknya benar-benar ada. */
+  if(!el.parentElement || el.parentElement.clientWidth < 80) return;
+  el.style.fontSize = '';
+  const lebar = el.parentElement.clientWidth - 24;
+  const maks  = parseFloat(getComputedStyle(el).fontSize) || 48;
+  const muat  = lebar / (teks.length * 0.63);        // monospace ~0.6em per karakter
+  el.style.fontSize = Math.max(18, Math.min(maks, muat)) + 'px';
+}
+
+/* Saat halaman dimuat ulang dengan kartu masih terbuka, tata letak hamparan
+   kadang belum jadi pada bingkai pertama. Coba beberapa bingkai sampai siap. */
+function pasFontSegera(el, teks, sisaCoba){
+  const n = sisaCoba === undefined ? 20 : sisaCoba;
+  if(el.parentElement && el.parentElement.clientWidth >= 80){ pasFont(el, teks); return; }
+  if(n > 0) requestAnimationFrame(() => pasFontSegera(el, teks, n - 1));
+}
+
+function cocok(k, teks){
+  const bersih = teks.replace(/[\s.,]/g, '');
+  if(!bersih) return false;
+  if(k.tipe === 'b2d'){
+    if(!/^\d+$/.test(bersih)) return false;
+    return parseInt(bersih, 10) === k.nilai;
+  }
+  if(!/^[01]+$/.test(bersih)) return false;        // nol di depan dimaafkan
+  return parseInt(bersih, 2) === k.nilai;
+}
+
+/* =========================================================================
+   PAPAN KARTU
+   ========================================================================= */
+const TANDA = { benar: '✓', salah: '✗', lewat: '⏱' };
+
+function gambarPapan(){
+  $('papan').innerHTML = simpanan.kartu.map((k, i) => {
+    const habis = k.status !== 'baru';
+    return '<button class="kartu' + (habis ? ' habis ' + k.status : '') +
+           '" data-i="' + i + '"' + (habis ? ' disabled' : '') +
+           ' aria-label="Kartu ' + (i + 1) + (habis ? ', sudah dikerjakan' : '') + '">' +
+           '<span class="no">' + (i + 1) + '</span>' +
+           (habis ? '<span class="tanda">' + TANDA[k.status] + '</span>' : '') +
+           '</button>';
+  }).join('');
+
+  const hit = t => simpanan.kartu.filter(k => k.status === t).length;
+  $('hBenar').textContent = hit('benar');
+  $('hSalah').textContent = hit('salah');
+  $('hLewat').textContent = hit('lewat');
+  $('hBuka').textContent  = simpanan.kartu.filter(k => k.status !== 'baru').length;
+  gambarRekap();
+}
+
+$('papan').addEventListener('click', e => {
+  const b = e.target.closest('.kartu');
+  if(b && !b.disabled) buka(+b.dataset.i);
+});
+
+/* =========================================================================
+   MEMBUKA KARTU
+   ========================================================================= */
+let jamTik = null;
+
+function buka(i){
+  const k = simpanan.kartu[i];
+  if(!k || k.status !== 'baru' || simpanan.dibuka) return;
+  simpanan.dibuka = { i: i, tenggat: Date.now() + DETIK[k.tingkat] * 1000 };
+  tulis();
+  bunyiBuka();
+  tampilSoal();
+}
+
+function tampilSoal(){
+  const d = simpanan.dibuka;
+  if(!d) return;
+  const k = simpanan.kartu[d.i];
+
+  $('sNo').textContent = d.i + 1;
+  const tg = $('sTingkat');
+  tg.className = 'tingkat ' + k.tingkat;
+  tg.textContent = k.tingkat === 'mudah' ? 'MUDAH · 150 DETIK' : 'SUSAH · 240 DETIK';
+
+  if(k.tipe === 'b2d'){
+    $('sAsk').textContent = 'BILANGAN BINER INI, BERAPA NILAI DESIMALNYA?';
+    $('sQ').textContent = biner(k.nilai);
+    $('sQ').className = 'q bin qin';
+    $('sInput').placeholder = 'contoh: 182';
+  }else{
+    $('sAsk').textContent = 'BILANGAN DESIMAL INI, TULIS DALAM BINER';
+    $('sQ').textContent = k.nilai;
+    $('sQ').className = 'q qin';
+    $('sInput').placeholder = 'contoh: 10110110';
+  }
+
+  $('sInput').value = '';
+  $('sInput').disabled = false;
+  $('sVonis').textContent = '';
+  $('sVonis').className = 'vonis';
+  $('bKirim').classList.remove('hidden');
+  $('bTutup').classList.add('hidden');
+  $('soal').classList.add('on');
+  pasFontSegera($('sQ'), $('sQ').textContent);
+  setTimeout(() => $('sInput').focus(), 60);
+  mulaiTik();
+}
+
+let detikTerakhir = 0;
+function mulaiTik(){
+  hentikanTik();
+  jamTik = setInterval(() => {
+    const d = simpanan.dibuka;
+    if(!d) return hentikanTik();
+    const k = simpanan.kartu[d.i];
+    const total = DETIK[k.tingkat] * 1000;
+    const sisa = Math.max(0, d.tenggat - Date.now());
+    $('sFill').style.width = (sisa / total * 100) + '%';
+    $('sBar').classList.toggle('warn', sisa < 20000);
+    const det = Math.ceil(sisa / 1000);
+    $('sDetik').textContent = det + 's';
+    if(det <= 10 && det > 0 && det !== detikTerakhir){ detikTerakhir = det; bunyiDetik(); }
+    if(sisa <= 0) habisWaktu();
+  }, 200);
+}
+function hentikanTik(){ if(jamTik){ clearInterval(jamTik); jamTik = null; } }
+
+/* =========================================================================
+   MENJAWAB
+   ========================================================================= */
+function tutupKartu(k, status, teksVonis, kelas){
+  const d = simpanan.dibuka;
+  const total = DETIK[k.tingkat] * 1000;
+  k.status = status;
+  k.detik = Math.round((total - Math.max(0, d.tenggat - Date.now())) / 1000);
+  simpanan.dibuka = null;
+  tulis();
+  hentikanTik();
+
+  $('sInput').disabled = true;
+  $('bKirim').classList.add('hidden');
+  $('bTutup').classList.remove('hidden');
+  $('sVonis').innerHTML = teksVonis;
+  $('sVonis').className = 'vonis ' + kelas;
+  gambarPapan();
+}
+
+function kirimJawaban(){
+  const d = simpanan.dibuka;
+  if(!d) return;
+  const k = simpanan.kartu[d.i];
+  const teks = $('sInput').value.trim();
+  if(!teks){ $('sInput').focus(); return; }
+
+  k.jawaban = teks;
+  const benar = cocok(k, teks);
+
+  if(benar){
+    tutupKartu(k, 'benar',
+      '✓ BENAR!<span class="urai">' + urai(k.nilai) + '</span>', 'ok');
+    suaraBenar();
+  }else{
+    tutupKartu(k, 'salah',
+      '✗ SALAH. Jawaban yang benar: <b>' + lolos(jawabanBenar(k)) + '</b>' +
+      '<span class="urai">' + urai(k.nilai) + '</span>', 'no');
+    suaraSalah();
+  }
+}
+
+function habisWaktu(){
+  const d = simpanan.dibuka;
+  if(!d) return;
+  const k = simpanan.kartu[d.i];
+  k.jawaban = $('sInput').value.trim();
+  tutupKartu(k, 'lewat',
+    '⏱ WAKTU HABIS. Jawaban yang benar: <b>' + lolos(jawabanBenar(k)) + '</b>' +
+    '<span class="urai">' + urai(k.nilai) + '</span>', 'no');
+  suaraHabis();
+}
+
+$('bKirim').addEventListener('click', kirimJawaban);
+$('bTutup').addEventListener('click', () => {
+  $('soal').classList.remove('on');
+  try{ speechSynthesis.cancel(); }catch(e){}
+});
+$('sInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); kirimJawaban(); }
+});
+
+/* =========================================================================
+   REKAP
+   ========================================================================= */
+const NAMA_HASIL = { baru:'belum dibuka', benar:'BENAR', salah:'SALAH', lewat:'habis waktu' };
+
+function gambarRekap(){
+  const dibuka = simpanan.kartu
+    .map((k, i) => ({ k, no: i + 1 }))
+    .filter(x => x.k.status !== 'baru');
+
+  $('rekap').innerHTML =
+    '<thead><tr><th>Kartu</th><th>Tingkat</th><th>Soal</th><th>Jawaban siswa</th>' +
+    '<th>Kunci</th><th>Hasil</th><th>Detik</th></tr></thead><tbody>' +
+    (dibuka.length ? dibuka.map(x => {
+      const k = x.k;
+      const warna = k.status === 'benar' ? 'var(--color-acc)'
+                  : k.status === 'salah' ? 'var(--color-bad)' : 'var(--color-hot)';
+      return '<tr><td>' + x.no + '</td><td>' + k.tingkat + '</td>' +
+        '<td>' + (k.tipe === 'b2d' ? biner(k.nilai) + ' → ?' : k.nilai + ' → ?') + '</td>' +
+        '<td>' + (k.jawaban ? lolos(k.jawaban) : '—') + '</td>' +
+        '<td>' + lolos(jawabanBenar(k)) + '</td>' +
+        '<td style="color:' + warna + '">' + NAMA_HASIL[k.status] + '</td>' +
+        '<td>' + k.detik + '</td></tr>';
+    }).join('')
+    : '<tr><td colspan="7" class="text-dimmer">Belum ada kartu yang dibuka.</td></tr>') +
+    '</tbody>';
+}
+
+$('bSalin').addEventListener('click', () => {
+  const dibuka = simpanan.kartu.map((k, i) => ({ k, no: i + 1 })).filter(x => x.k.status !== 'baru');
+  if(!dibuka.length){ pesanSalin('Belum ada kartu yang dibuka.', false); return; }
+  const baris = ['Nama\tKartu\tTingkat\tArah\tSoal\tJawaban siswa\tKunci\tHasil\tDetik'];
+  dibuka.forEach(x => {
+    const k = x.k;
+    baris.push([
+      simpanan.nama || '(tanpa nama)', x.no, k.tingkat,
+      k.tipe === 'b2d' ? 'Biner ke Desimal' : 'Desimal ke Biner',
+      k.tipe === 'b2d' ? biner(k.nilai) : k.nilai,
+      k.jawaban || '', jawabanBenar(k), NAMA_HASIL[k.status], k.detik
+    ].join('\t'));
+  });
+  navigator.clipboard.writeText(baris.join('\n'))
+    .then(() => pesanSalin('Rekap disalin — tinggal tempel ke Excel atau Google Sheets.', true))
+    .catch(() => pesanSalin('Penyalinan ditolak browser. Salin manual dari tabel di atas.', false));
+});
+function pesanSalin(t, ok){
+  $('pesanSalin').textContent = t;
+  $('pesanSalin').style.color = ok ? 'var(--color-acc)' : 'var(--color-bad)';
+}
+
+/* =========================================================================
+   KENDALI LAIN
+   ========================================================================= */
+$('nama').value = simpanan.nama || '';
+$('nama').addEventListener('input', () => { simpanan.nama = $('nama').value.trim(); tulis(); });
+
+$('bUlang').addEventListener('click', () => {
+  if(!confirm('Buat 30 kartu baru? Semua jawaban yang sudah dikerjakan akan dihapus.')) return;
+  simpanan.kartu = susunKartu();
+  simpanan.dibuka = null;
+  tulis();
+  $('soal').classList.remove('on');
+  hentikanTik();
+  gambarPapan();
+});
+
+$('bSuara').addEventListener('click', () => {
+  simpanan.suara = !simpanan.suara; tulis();
+  $('bSuara').setAttribute('aria-pressed', simpanan.suara);
+  $('bSuara').textContent = simpanan.suara ? '🔊' : '🔇';
+  if(!simpanan.suara){ try{ speechSynthesis.cancel(); }catch(e){} }
+  else nada(880, .08, 'square', .06);
+});
+
+const LABEL_ZOOM = ['⛶ NORMAL', '⛶ BESAR', '⛶ TV'];
+function pasangZoom(){
+  const z = simpanan.zoom || 0;
+  document.documentElement.classList.toggle('zoom1', z === 1);
+  document.documentElement.classList.toggle('zoom2', z === 2);
+  $('bProj').textContent = LABEL_ZOOM[z];
+  $('bProj').setAttribute('aria-pressed', z > 0);
+  ukurKanvas();
+  if(simpanan.dibuka) pasFont($('sQ'), $('sQ').textContent);
+}
+$('bProj').addEventListener('click', () => {
+  simpanan.zoom = ((simpanan.zoom || 0) + 1) % 3; tulis(); pasangZoom();
+});
+
+/* =========================================================================
+   AWAL — termasuk memulihkan kartu yang terlanjur terbuka
+   ========================================================================= */
+$('bSuara').setAttribute('aria-pressed', simpanan.suara);
+$('bSuara').textContent = simpanan.suara ? '🔊' : '🔇';
+pasangZoom();
+
+if(simpanan.dibuka){
+  const d = simpanan.dibuka;
+  const k = simpanan.kartu[d.i];
+  if(!k || k.status !== 'baru'){
+    simpanan.dibuka = null; tulis();
+  }else if(Date.now() >= d.tenggat){
+    /* Halaman dimuat ulang setelah waktunya lewat — kartu tetap hangus,
+       supaya memuat ulang tidak bisa dipakai menghindari soal yang sulit. */
+    k.status = 'lewat';
+    k.detik = DETIK[k.tingkat];
+    simpanan.dibuka = null;
+    tulis();
+  }else{
+    tampilSoal();                 // waktunya terus berjalan menembus muat ulang
+  }
+}
+gambarPapan();
+</script>
+</body>
+</html>

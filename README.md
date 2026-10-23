@@ -10,6 +10,7 @@ meski Wi-Fi putus.
 |---|---|---|
 | `index.html` | **ya** | Permainan luring (satu perangkat, tanpa server) |
 | `daring.html` | ya, kalau memakai mode daring | Permainan bergiliran antar-HP |
+| `remedial.html` | ya, kalau memakai remedial | Papan 30 kartu soal untuk remedial |
 | `tailwind.css` | **ya** | Gaya tampilan, hasil bangun Tailwind |
 | `.nojekyll` | ya | Agar GitHub Pages tidak memproses ulang |
 | `README.md` | boleh | Panduan ini |
@@ -24,6 +25,8 @@ meski Wi-Fi putus.
 - **Daring — `daring.html`.** Murid bergiliran menjawab dari HP masing-masing, nilai
   masuk sendiri ke Google Spreadsheet. Butuh pemasangan sekali lewat Google Apps Script.
   Langkahnya ada di **[PANDUAN-DARING.md](PANDUAN-DARING.md)**.
+- **Remedial — `remedial.html`.** Papan 30 kartu tertutup untuk murid yang perlu
+  mengulang. Tanpa server, cukup dibuka di HP murid.
 
 `tailwind.css` adalah **berkas statis biasa** — bukan CDN. Jadi tidak ada permintaan
 ke internet sama sekali, dan permainan tetap jalan di kelas tanpa jaringan.
@@ -175,6 +178,34 @@ sesuai cara penulisan di papan tulis dan soal ujian.
 
 Skor, rekor, lencana, dan Papan Kelas tersimpan di perangkat masing-masing
 (`localStorage`), bertahan antar pertemuan tanpa perlu akun.
+
+---
+
+## Remedial — papan 30 kartu
+
+Untuk murid yang perlu mengulang. Buka `remedial.html`, tulis nama, lalu pilih kartu.
+
+- **30 kartu tertutup** dengan punggung yang sama persis — tidak ada petunjuk apa pun
+  tentang isinya sebelum dipilih.
+- **15 kartu mudah** (bilangan ratusan, 100–999) dengan waktu **150 detik**, dan
+  **15 kartu susah** (bilangan ribuan, 1.000–9.999) dengan waktu **240 detik**.
+- Arah soalnya diacak per kartu: bisa biner → desimal, bisa desimal → biner.
+- Jawaban diketik di kotak teks. Nol di depan dan spasi dimaafkan, jadi
+  `0010 1101` tetap dinilai sama dengan `101101`.
+- Begitu dijawab, terdengar **suara** yang menyebut benar atau salah, lalu kunci
+  jawaban beserta uraian nilai tempatnya ditampilkan sebagai bahan belajar.
+- **Kartu yang sudah dibuka tidak bisa dipilih lagi** — termasuk kalau halaman
+  dimuat ulang. Waktunya pun terus berjalan menembus muat ulang, jadi menyegarkan
+  halaman tidak bisa dipakai menghindari soal yang sulit.
+- Tombol **MULAI ULANG** membuat 30 kartu baru dan menghapus semua jawaban.
+
+Penilaian dilakukan guru secara manual. Di bagian bawah halaman ada tabel rekap
+(kartu, tingkat, soal, jawaban murid, kunci, hasil, detik) dengan tombol
+**SALIN REKAP** untuk ditempel ke Excel atau Google Sheets.
+
+Suaranya memakai pembaca teks bawaan perangkat. Kalau HP murid tidak punya suara
+bahasa Indonesia, penanda benar/salah tetap terdengar sebagai nada — jadi tidak
+pernah hilang sama sekali.
 
 ---
 

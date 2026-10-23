@@ -124,6 +124,7 @@
     <div class="row">
       <button class="btn" id="bGuru">PAPAN KELAS →</button>
       <button class="btn" id="bDaring">MODE DARING →</button>
+      <button class="btn" id="bRemedial">REMEDIAL 30 KARTU →</button>
     </div>
     <div class="h">Mode daring: murid bergiliran menjawab dari HP masing-masing dan nilainya
     masuk sendiri ke Google Spreadsheet. Perlu dipasang sekali — lihat PANDUAN-DARING.md.</div>
@@ -1736,6 +1737,7 @@ $('bGuru').addEventListener('click', () => {
   $('home').classList.add('hidden'); $('guru').classList.remove('hidden'); renderGTable();
 });
 $('bDaring').addEventListener('click', () => { location.href = 'daring.html'; });
+$('bRemedial').addEventListener('click', () => { location.href = 'remedial.html'; });
 $('gBack').addEventListener('click', () => {
   $('guru').classList.add('hidden'); $('home').classList.remove('hidden');
 });
