@@ -10,7 +10,7 @@ meski Wi-Fi putus.
 |---|---|---|
 | `index.html` | **ya** | Permainan luring (satu perangkat, tanpa server) |
 | `daring.html` | ya, kalau memakai mode daring | Permainan bergiliran antar-HP |
-| `remedial.html` | ya, kalau memakai remedial | Papan 30 kartu soal untuk remedial |
+| `remedial.html` | ya, kalau memakai remedial | Papan 50 kartu soal untuk remedial |
 | `tailwind.css` | **ya** | Gaya tampilan, hasil bangun Tailwind |
 | `.nojekyll` | ya | Agar GitHub Pages tidak memproses ulang |
 | `README.md` | boleh | Panduan ini |
@@ -25,7 +25,7 @@ meski Wi-Fi putus.
 - **Daring — `daring.html`.** Murid bergiliran menjawab dari HP masing-masing, nilai
   masuk sendiri ke Google Spreadsheet. Butuh pemasangan sekali lewat Google Apps Script.
   Langkahnya ada di **[PANDUAN-DARING.md](PANDUAN-DARING.md)**.
-- **Remedial — `remedial.html`.** Papan 30 kartu tertutup untuk murid yang perlu
+- **Remedial — `remedial.html`.** Papan 50 kartu tertutup untuk murid yang perlu
   mengulang. Tanpa server, cukup dibuka di HP murid.
 
 `tailwind.css` adalah **berkas statis biasa** — bukan CDN. Jadi tidak ada permintaan
@@ -181,13 +181,13 @@ Skor, rekor, lencana, dan Papan Kelas tersimpan di perangkat masing-masing
 
 ---
 
-## Remedial — papan 30 kartu
+## Remedial — papan 50 kartu
 
 Untuk murid yang perlu mengulang. Buka `remedial.html`, tulis nama, lalu pilih kartu.
 
-- **30 kartu tertutup** dengan punggung yang sama persis — tidak ada petunjuk apa pun
+- **50 kartu tertutup** dengan punggung yang sama persis — tidak ada petunjuk apa pun
   tentang isinya sebelum dipilih.
-- **20 kartu mudah** (bilangan ratusan, 100–999) dengan waktu **150 detik**, dan
+- **40 kartu mudah** (bilangan ratusan, 100–999) dengan waktu **150 detik**, dan
   **10 kartu susah** (bilangan ribuan, 1.000–9.999) dengan waktu **240 detik**.
 - Arah soalnya diacak per kartu: bisa biner → desimal, bisa desimal → biner.
 - Jawaban diketik di kotak teks. Nol di depan dan spasi dimaafkan, jadi
@@ -200,7 +200,7 @@ Untuk murid yang perlu mengulang. Buka `remedial.html`, tulis nama, lalu pilih k
 - Tombol **ACAK LETAK KARTU** mengocok ulang posisi kartu yang belum terbuka.
   Kartu yang sudah dikerjakan dibiarkan di tempatnya supaya nomor di rekap tidak
   berubah. Tombol ini menolak bekerja selama masih ada kartu yang terbuka.
-- Tombol **MULAI ULANG** membuat 30 kartu baru dan menghapus semua jawaban.
+- Tombol **MULAI ULANG** membuat 50 kartu baru dan menghapus semua jawaban.
 
 Penilaian dilakukan guru secara manual. Di bagian bawah halaman ada tabel rekap
 (kartu, tingkat, soal, jawaban murid, hasil, detik) dengan tombol **SALIN REKAP**

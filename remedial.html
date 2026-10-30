@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BIT BLITZ REMEDIAL — 30 Kartu Soal</title>
-<meta name="description" content="Remedial konversi biner: 30 kartu soal acak, mudah dan susah, dengan suara penanda benar atau salah.">
+<title>BIT BLITZ REMEDIAL — 50 Kartu Soal</title>
+<meta name="description" content="Remedial konversi biner: 50 kartu soal acak, mudah dan susah, dengan suara penanda benar atau salah.">
 <link rel="stylesheet" href="tailwind.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
 <div class="wrap">
 
 <header>
-  <div class="logo"><b>BIT</b> <i>BLITZ</i><span>REMEDIAL · 30 KARTU SOAL</span></div>
+  <div class="logo"><b>BIT</b> <i>BLITZ</i><span>REMEDIAL · 50 KARTU SOAL</span></div>
   <div class="spacer"></div>
   <button class="icobtn" id="bSuara" aria-pressed="true" title="Suara">🔊</button>
   <button class="icobtn" id="bProj" aria-pressed="false" title="Perbesaran: Normal → Besar → TV">⛶ NORMAL</button>
@@ -29,11 +29,14 @@
     <input id="nama" placeholder="Tulis nama lengkapmu" autocomplete="off">
   </div>
   <p class="text-[.82rem] leading-relaxed text-dim">
-    Ada <b class="text-gold">30 kartu</b> tertutup di bawah. Punggung kartunya sama
-    semua — kamu tidak tahu isinya sebelum memilih. <b class="text-acc">20 kartu mudah</b>
-    (angka ratusan, waktu 150 detik) dan <b class="text-mag">10 kartu susah</b>
-    (angka ribuan, waktu 240 detik). Arah soalnya juga acak: bisa biner ke desimal, bisa
-    sebaliknya. Tombol <b>Acak Letak Kartu</b> mengocok ulang posisi kartu yang belum terbuka.
+    Ada <b class="text-gold"><span id="tTotal">50</span> kartu</b> tertutup di bawah.
+    Punggung kartunya sama semua — kamu tidak tahu isinya sebelum memilih.
+    <b class="text-acc"><span id="tMudah">40</span> kartu mudah</b>
+    (angka ratusan, waktu <span id="tDetikMudah">150</span> detik) dan
+    <b class="text-mag"><span id="tSusah">10</span> kartu susah</b>
+    (angka ribuan, waktu <span id="tDetikSusah">240</span> detik). Arah soalnya juga acak:
+    bisa biner ke desimal, bisa sebaliknya. Tombol <b>Acak Letak Kartu</b> mengocok ulang
+    posisi kartu yang belum terbuka.
   </p>
   <p class="mt-2 text-[.82rem] leading-relaxed text-dim">
     Waktu mulai berjalan begitu kartu dibuka, dan
@@ -49,7 +52,7 @@
 
 <!-- ================== PAPAN SKOR RINGKAS ================== -->
 <div class="hud mt-4">
-  <span class="chip">TERBUKA <b id="hBuka">0</b>/30</span>
+  <span class="chip">TERBUKA <b id="hBuka">0</b>/<span id="hTotal">50</span></span>
   <span class="chip sc">BENAR <b id="hBenar">0</b></span>
   <span class="chip">SALAH <b id="hSalah">0</b></span>
   <span class="chip">HABIS WAKTU <b id="hLewat">0</b></span>
@@ -119,12 +122,13 @@
 "use strict";
 /* =========================================================================
    BIT BLITZ REMEDIAL
-   30 kartu tertutup. 15 mudah (ratusan, 150 detik) + 15 susah (ribuan, 240 detik).
+   50 kartu tertutup: 40 mudah (ratusan, 150 detik) + 10 susah (ribuan, 240 detik).
    Arah konversi diacak per kartu. Penilaian akhir dilakukan guru.
    ========================================================================= */
 
-const JUM   = { mudah: 20, susah: 10 };
+const JUM   = { mudah: 40, susah: 10 };
 const DETIK = { mudah: 150, susah: 240 };
+const TOTAL = JUM.mudah + JUM.susah;
 const LS    = 'bitblitz.remedial';
 
 const $  = id => document.getElementById(id);
@@ -308,7 +312,7 @@ function susunKartu(){
   return daftar;
 }
 
-if(!Array.isArray(simpanan.kartu) || simpanan.kartu.length !== JUM.mudah + JUM.susah){
+if(!Array.isArray(simpanan.kartu) || simpanan.kartu.length !== TOTAL){
   simpanan.kartu = susunKartu();
   simpanan.dibuka = null;
   tulis();
@@ -609,7 +613,7 @@ $('bAcak').addEventListener('click', () => {
 });
 
 $('bUlang').addEventListener('click', () => {
-  if(!confirm('Buat 30 kartu baru? Semua jawaban yang sudah dikerjakan akan dihapus.')) return;
+  if(!confirm('Buat ' + TOTAL + ' kartu baru? Semua jawaban yang sudah dikerjakan akan dihapus.')) return;
   simpanan.kartu = susunKartu();
   simpanan.dibuka = null;
   tulis();
@@ -644,6 +648,15 @@ $('bProj').addEventListener('click', () => {
 /* =========================================================================
    AWAL — termasuk memulihkan kartu yang terlanjur terbuka
    ========================================================================= */
+/* Semua angka di layar diambil dari JUM/DETIK, jadi mengubah komposisi soal
+   cukup di satu tempat dan teksnya tidak mungkin tertinggal. */
+$('tTotal').textContent      = TOTAL;
+$('tMudah').textContent      = JUM.mudah;
+$('tSusah').textContent      = JUM.susah;
+$('tDetikMudah').textContent = DETIK.mudah;
+$('tDetikSusah').textContent = DETIK.susah;
+$('hTotal').textContent      = TOTAL;
+
 $('bSuara').setAttribute('aria-pressed', simpanan.suara);
 $('bSuara').textContent = simpanan.suara ? '🔊' : '🔇';
 pasangZoom();

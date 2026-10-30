@@ -869,3 +869,20 @@
   70%  { transform: translateY(4px) rotate(3deg) }
   100% { transform: translateY(0) rotate(0) }
 }
+
+/* Di layar sempit, bantalan papan memakan ruang sehingga hanya muat dua kartu
+   per baris — terlalu banyak menggulir untuk 50 kartu. Kartunya dirapatkan
+   dan dikecilkan supaya muat empat per baris. */
+@media (max-width: 520px) {
+  .papan {
+    grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));
+    gap: .35rem;
+    padding: .45rem;
+  }
+  .kartu { border-width: 1px; border-radius: 11px; box-shadow: 0 4px 0 rgba(0,0,0,.5); }
+  .kartu .bingkai { inset: 4px; border-radius: 7px; }
+  .kartu .no { font-size: 1.15rem; }
+  .kartu .pola { font-size: .6rem; }
+  .kartu .sudut { font-size: .42rem; }
+  .kartu .tanda { font-size: 1.05rem; bottom: 14%; }
+}
